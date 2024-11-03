@@ -1,0 +1,30 @@
+{
+  "format_version": 2,
+  "header": {
+    "name": "House Builder",
+    "description": "Builds a house from TypeScript definitions",
+    "uuid": "675890df-cca5-4f31-956a-70564b5c63db",
+    "version": [1, 0, 0],
+    "min_engine_version": [1, 20, 30]
+  },
+  "modules": [
+    {
+      "description": "Script resources",
+      "language": "javascript",
+      "type": "script",
+      "uuid": "dcbedfd8-7b5a-4f6a-929d-0bb7323af8e0",
+      "version": [1, 0, 0],
+      "entry": "scripts/main.js"
+    }
+  ],
+  "dependencies": [
+    {
+      "module_name": "@minecraft/server",
+      "version": "1.8.0"
+    },
+    {
+      "uuid": "2d7ed858-97eb-48a0-b180-7c80d1ce9a48",
+      "version": [1, 0, 0]
+    }
+  ]
+}

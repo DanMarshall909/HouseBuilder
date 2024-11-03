@@ -1,0 +1,24 @@
+{
+  "format_version": 2,
+  "header": {
+    "name": "House Builder",
+    "description": "Builds a house from TypeScript definitions",
+    "uuid": "8655790e-410f-40e4-a385-31a95e8ea498",
+    "version": [1, 0, 0],
+    "min_engine_version": [1, 20, 30]
+  },
+  "modules": [
+    {
+      "description": "My Resource Pack",
+      "type": "resources",
+      "uuid": "f12e0c2a-687b-43c4-9e78-1b91dc8d9e58",
+      "version": [1, 0, 0]
+    }
+  ],
+  "dependencies": [
+    {
+      "uuid": "14e467b4-e3aa-49d3-8352-f8439fd7b2ee",
+      "version": [1, 0, 0]
+    }
+  ]
+}
