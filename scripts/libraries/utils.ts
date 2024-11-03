@@ -1,4 +1,0 @@
-
-
-MinecraftBlockRegistry.initialize();
-

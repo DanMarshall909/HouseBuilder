@@ -1,25 +1,19 @@
-import { world, Vector3, BlockPermutation, system } from "@minecraft/server";
+import { BlockIO } from "./libraries/BlockIO";
+import { MinecraftBlockIO } from "./libraries/implementations/MinecraftBlockIO";
+import { MinecraftBlockRegistry } from "./libraries/implementations/MinecraftBlockRegistry";
+import { Blocks } from "./libraries/Types/Blocks";
+import Point from "./libraries/Types/Position";
 
+// Initialize the registry at the start of the application
+MinecraftBlockRegistry.initialize();
 
-function mainTick() {
-  if (system.currentTick % 100 === 0) {
-    say("Hello starter! Tick: " + system.currentTick);
+// Example of using the MinecraftBlockIO with BlockIO interface
+const blockIO: BlockIO = new MinecraftBlockIO();
+const position: Point = { x: 0, y: 64, z: 0 } as Point;
 
-		// Get current player position
-		const player = world.getPlayers()[0];
-		const playerPosition = player.getHeadLocation();
-		put(playerPosition, "Stone");
-  }
+// Place a block at the specified position
+blockIO.put(position, Blocks.DiamondBlock);
 
-  system.run(mainTick);
-}
-
-system.run(mainTick);
-function say(arg0: string) {
-	throw new Error("Function not implemented.");
-}
-
-function put(playerPosition: Vector3, arg1: string) {
-	throw new Error("Function not implemented.");
-}
-
+// Retrieve a block type from a position
+const retrievedBlock = blockIO.get(position);
+console.log(retrievedBlock);
