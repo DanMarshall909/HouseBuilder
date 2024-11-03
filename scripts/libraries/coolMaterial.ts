@@ -1,32 +1,78 @@
+// MaterialSelector.ts
+
 import { Blocks } from "./Types/Blocks";
 import Point from "./Types/Position";
 
 /**
- * Picks a beautiful colored glass block based on the given coordinates.
- * @param position - The position to use for selecting the material.
+ * Selects a colored glass block based on the given formula.
+ * @param position - The position used for calculating the material.
+ * @param index - An index to add a changing effect over time.
+ * @param formula - A function that takes position and index and returns an index for the color array.
  * @returns A `Blocks` key representing a glass color.
  */
-export default function getMaterial(position: Point, tick: number): keyof typeof Blocks {
+export function getMaterial(
+  position: Point,
+  index: number,
+  formula: (position: Point, index: number) => number
+): keyof typeof Blocks {
   const materials: (keyof typeof Blocks)[] = [
-    "BlackStainedGlass",
-    "BlueStainedGlass",
-    "BrownStainedGlass",
-    "CyanStainedGlass",
-    "GrayStainedGlass",
-    "GreenStainedGlass",
-    "LightBlueStainedGlass",
-    "LightGrayStainedGlass",
-    "LimeStainedGlass",
-    "MagentaStainedGlass",
-    "OrangeStainedGlass",
-    "PinkStainedGlass",
-    "PurpleStainedGlass",
     "RedStainedGlass",
-    "WhiteStainedGlass",
+    "OrangeStainedGlass",
     "YellowStainedGlass",
+    "LimeStainedGlass",
+    "GreenStainedGlass",
+    "CyanStainedGlass",
+    "LightBlueStainedGlass",
+    "BlueStainedGlass",
+    "PurpleStainedGlass",
+    "MagentaStainedGlass",
+    "PinkStainedGlass",
+    "WhiteStainedGlass",
   ];
 
-  // Calculate the index based on the position
-  const index = Math.abs((position.x + position.y + position.z + tick) % materials.length);
-  return materials[index];
+  // Use the provided formula to calculate the material index
+  const colorIndex = Math.abs(formula(position, index) % materials.length);
+  return materials[colorIndex];
+}
+
+/**
+ * Gradient Formula: Generates a color index based on the sum of position coordinates.
+ * @param position - The position used for calculating the index.
+ * @param index - An index to add a changing effect over time.
+ * @returns A calculated index for color selection.
+ */
+export function gradientFormula(position: Point, index: number): number {
+  return position.x + position.y + position.z + index;
+}
+
+/**
+ * Wave Formula: Generates a color index based on a sine wave pattern.
+ * @param position - The position used for calculating the index.
+ * @param index - An index to add a changing effect over time.
+ * @returns A calculated index for color selection.
+ */
+export function waveFormula(position: Point, index: number): number {
+  return Math.floor((Math.sin((position.x + position.y + position.z + index) * 0.1) + 1) * 5);
+}
+
+/**
+ * Radial Formula: Generates a color index based on the radial distance from the origin.
+ * @param position - The position used for calculating the index.
+ * @param index - An index to add a changing effect over time.
+ * @returns A calculated index for color selection.
+ */
+export function radialFormula(position: Point, index: number): number {
+  const distance = Math.sqrt(position.x * position.x + position.y * position.y + position.z * position.z);
+  return Math.floor(distance + index);
+}
+
+/**
+ * Sparkle Formula: Generates a color index with a random sparkle effect.
+ * @param position - The position used for calculating the index.
+ * @param index - An index to add a changing effect over time.
+ * @returns A calculated index for color selection, occasionally adding randomness.
+ */
+export function sparkleFormula(position: Point, index: number): number {
+  const baseIndex = position.x + position.y + position.z + index;
+  return Math.random() > 0.9 ? baseIndex + Math.floor(Math.random() * 3) : baseIndex;
 }

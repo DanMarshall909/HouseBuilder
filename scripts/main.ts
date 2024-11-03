@@ -1,24 +1,34 @@
-import { world, Vector3, BlockPermutation, system } from "@minecraft/server";
+import { world, system } from "@minecraft/server";
 import { BlockIO } from "./libraries/BlockIO";
 import { MinecraftBlockIO } from "./libraries/implementations/MinecraftBlockIO";
 import { MinecraftBlockRegistry } from "./libraries/implementations/MinecraftBlockRegistry";
 import { Blocks } from "./libraries/Types/Blocks";
 import Point from "./libraries/Types/Position";
-import getMaterial from "./libraries/coolMaterial";
+import { getMaterial, waveFormula } from "./libraries/coolMaterial";
 
 MinecraftBlockRegistry.initialize();
 const blockIO: BlockIO = new MinecraftBlockIO();
 
-const size = 10; // Define the size of the grid
 let previousPoints: Point[] = []; // Store the points of the previous frame to clear them
 
-function drawSphere(tick: number) {
+/**
+ * Draws a hollow sphere with a surface thickness of 1 block.
+ * @param center - The center point of the sphere.
+ * @param radius - The radius of the sphere.
+ * @param tick - The current tick for animation purposes.
+ * @param formula - The formula function used to select colors.
+ */
+function drawSphere(center: Point, radius: number, tick: number, formula: (position: Point, index: number) => number) {
   const currentPoints: Point[] = []; // Store the points for the current frame
 
-  const radius = 10;
-  const center = new Point(20, 10, 0);
-
   const radiusSquared = radius * radius;
+  const minDistanceSquared = (radius - 1) * (radius - 1);
+  const maxDistanceSquared = (radius + 1) * (radius + 1);
+
+  // Clear the blocks from the previous frame
+  for (const point of previousPoints) {
+    blockIO.put(point, Blocks.Air);
+  }
 
   // Iterate over a cubic region that bounds the sphere
   for (let x = -radius; x <= radius; x++) {
@@ -27,29 +37,34 @@ function drawSphere(tick: number) {
         // Calculate the distance squared from the center
         const distanceSquared = x * x + y * y + z * z;
 
-        // Check if the point is on the surface of the sphere (within a small range to make it hollow)
-        if (distanceSquared >= radiusSquared - radius && distanceSquared <= radiusSquared) {
-          // Calculate the exact position
+        // Check if the point is within 1 block of the sphere's surface
+        if (distanceSquared >= minDistanceSquared && distanceSquared <= maxDistanceSquared) {
           const point = new Point(center.x + x, center.y + y, center.z + z);
 
-          // Choose a material based on the position for a colorful effect
-          const material = getMaterial(point as Point, tick);
+          // Use getMaterial with the chosen formula
+          const material = getMaterial(point, tick, formula);
           blockIO.put(point, Blocks[material]);
+
+          // Store the point for clearing in the next frame
+          currentPoints.push(point);
         }
       }
     }
   }
 
-  // Update previousPoints to the current frame points
+  // Update previousPoints to the current frame's points
   previousPoints = currentPoints;
 }
 
-// Continuously run the animation by scheduling drawWaveFrame on each tick
+// Continuously run the animation by scheduling drawSphere on each tick
 function mainTick() {
   const currentTick = system.currentTick;
 
-  // Update the wave animation every tick
-  drawSphere(currentTick);
+  // Define the center of the sphere dynamically
+  const center = new Point(40, -40, 0);
+
+  // Update the animation with the chosen formula every tick
+  drawSphere(center, 20, currentTick, waveFormula); // Replace `waveFormula` with any desired formula (e.g., `gradientFormula`, `radialFormula`, `sparkleFormula`)
 
   // Schedule the next frame
   system.run(mainTick);
