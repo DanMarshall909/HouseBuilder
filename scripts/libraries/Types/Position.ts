@@ -1,6 +1,10 @@
-// Point.ts
-
 import { Prism } from "./Prism";
+
+export interface IPoint {
+  x: number;
+  y: number;
+  z: number;
+}
 
 export default class Point {
   x: number;
