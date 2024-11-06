@@ -3,6 +3,23 @@
 import { Block, BlockType } from "./Types/Blocks";
 import Point from "./Types/Position";
 
+const funkyGlassBlockTypes: BlockType[] = [
+  BlockType.RedStainedGlass,
+  BlockType.OrangeStainedGlass,
+  BlockType.YellowStainedGlass,
+  BlockType.LimeStainedGlass,
+  BlockType.GreenStainedGlass,
+  BlockType.CyanStainedGlass,
+  BlockType.LightBlueStainedGlass,
+  BlockType.BlueStainedGlass,
+  BlockType.PurpleStainedGlass,
+  BlockType.MagentaStainedGlass,
+  BlockType.PinkStainedGlass,
+  BlockType.WhiteStainedGlass,
+];
+
+
+
 /**
  * Selects a colored glass block based on the given formula.
  * @param position - The position used for calculating the material.
@@ -10,29 +27,9 @@ import Point from "./Types/Position";
  * @param formula - A function that takes position and index and returns an index for the color array.
  * @returns A `Blocks` key representing a glass color.
  */
-export function getFunkyGlass(
-  position: Point,
-  index: number,
-  formula: (position: Point, index: number) => number
-): Block {
-  const materials: BlockType[] = [
-    BlockType.RedStainedGlass,
-    BlockType.OrangeStainedGlass,
-    BlockType.YellowStainedGlass,
-    BlockType.LimeStainedGlass,
-    BlockType.GreenStainedGlass,
-    BlockType.CyanStainedGlass,
-    BlockType.LightBlueStainedGlass,
-    BlockType.BlueStainedGlass,
-    BlockType.PurpleStainedGlass,
-    BlockType.MagentaStainedGlass,
-    BlockType.PinkStainedGlass,
-    BlockType.WhiteStainedGlass,
-  ];
-
-  // Use the provided formula to calculate the material index
-  const colorIndex = Math.abs(formula(position, index) % materials.length);
-  return new Block(materials[colorIndex]);
+export function getIndexedBlock(index: number): Block {
+  const colorIndex = index % funkyGlassBlockTypes.length;
+  return new Block(funkyGlassBlockTypes[colorIndex]);
 }
 
 /**
@@ -41,8 +38,8 @@ export function getFunkyGlass(
  * @param index - An index to add a changing effect over time.
  * @returns A calculated index for color selection.
  */
-export function gradientFormula(position: Point, index: number): number {
-  return position.x + position.y + position.z + index;
+export function gradientFormula(position: Point, index: number): Block {
+  return getIndexedBlock(position.x + position.y + position.z + index);
 }
 
 /**
@@ -51,8 +48,8 @@ export function gradientFormula(position: Point, index: number): number {
  * @param index - An index to add a changing effect over time.
  * @returns A calculated index for color selection.
  */
-export function waveFormula(position: Point, index: number): number {
-  return Math.floor((Math.sin((position.x + position.y + position.z + index) * 0.1) + 1) * 5);
+export function waveFormula(position: Point, index: number): Block {
+  return getIndexedBlock(Math.floor((Math.sin((position.x + position.y + position.z + index) * 0.1) + 1) * 5));
 }
 
 /**
@@ -61,9 +58,9 @@ export function waveFormula(position: Point, index: number): number {
  * @param index - An index to add a changing effect over time.
  * @returns A calculated index for color selection.
  */
-export function radialFormula(position: Point, index: number): number {
+export function radialFormula(position: Point, index: number): Block {
   const distance = Math.sqrt(position.x * position.x + position.y * position.y + position.z * position.z);
-  return Math.floor(distance + index);
+  return getIndexedBlock(Math.floor(distance + index));
 }
 
 /**
