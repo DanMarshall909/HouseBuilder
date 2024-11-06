@@ -3,6 +3,7 @@
 import { Block, BlockType } from "./Types/Blocks";
 import Point from "./Types/Position";
 
+// List of glass block types for colorful selection.
 const funkyGlassBlockTypes: BlockType[] = [
   BlockType.RedStainedGlass,
   BlockType.OrangeStainedGlass,
@@ -18,14 +19,10 @@ const funkyGlassBlockTypes: BlockType[] = [
   BlockType.WhiteStainedGlass,
 ];
 
-
-
 /**
- * Selects a colored glass block based on the given formula.
- * @param position - The position used for calculating the material.
- * @param index - An index to add a changing effect over time.
- * @param formula - A function that takes position and index and returns an index for the color array.
- * @returns A `Blocks` key representing a glass color.
+ * Retrieves a colored glass block based on a provided index.
+ * @param index - The index to determine the color.
+ * @returns A new Block instance with the selected color.
  */
 export function getIndexedBlock(index: number): Block {
   const colorIndex = index % funkyGlassBlockTypes.length;
@@ -33,41 +30,41 @@ export function getIndexedBlock(index: number): Block {
 }
 
 /**
- * Gradient Formula: Generates a color index based on the sum of position coordinates.
- * @param position - The position used for calculating the index.
- * @param index - An index to add a changing effect over time.
- * @returns A calculated index for color selection.
+ * Selects a block color based on the sum of position coordinates and an index.
+ * @param position - Position object with x, y, z coordinates.
+ * @param index - Modifier index for dynamic selection.
+ * @returns A Block instance representing a glass color.
  */
 export function gradientFormula(position: Point, index: number): Block {
   return getIndexedBlock(position.x + position.y + position.z + index);
 }
 
 /**
- * Wave Formula: Generates a color index based on a sine wave pattern.
- * @param position - The position used for calculating the index.
- * @param index - An index to add a changing effect over time.
- * @returns A calculated index for color selection.
+ * Selects a block color using a sine wave pattern from position and index.
+ * @param position - Position object with x, y, z coordinates.
+ * @param index - Modifier index for dynamic selection.
+ * @returns A Block instance representing a glass color.
  */
 export function waveFormula(position: Point, index: number): Block {
   return getIndexedBlock(Math.floor((Math.sin((position.x + position.y + position.z + index) * 0.1) + 1) * 5));
 }
 
 /**
- * Radial Formula: Generates a color index based on the radial distance from the origin.
- * @param position - The position used for calculating the index.
- * @param index - An index to add a changing effect over time.
- * @returns A calculated index for color selection.
+ * Determines a block color based on radial distance from origin combined with an index.
+ * @param position - Position object with x, y, z coordinates.
+ * @param index - Modifier index for dynamic selection.
+ * @returns A Block instance representing a glass color.
  */
 export function radialFormula(position: Point, index: number): Block {
-  const distance = Math.sqrt(position.x * position.x + position.y * position.y + position.z * position.z);
+  const distance = Math.sqrt(position.x ** 2 + position.y ** 2 + position.z ** 2);
   return getIndexedBlock(Math.floor(distance + index));
 }
 
 /**
- * Sparkle Formula: Generates a color index with a random sparkle effect.
- * @param position - The position used for calculating the index.
- * @param index - An index to add a changing effect over time.
- * @returns A calculated index for color selection, occasionally adding randomness.
+ * Randomly enhances the color index based on position and index to create a sparkle effect.
+ * @param position - Position object with x, y, z coordinates.
+ * @param index - Modifier index for dynamic selection.
+ * @returns An index potentially modified by a random factor for sparkle.
  */
 export function sparkleFormula(position: Point, index: number): number {
   const baseIndex = position.x + position.y + position.z + index;
