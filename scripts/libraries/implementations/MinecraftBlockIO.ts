@@ -1,7 +1,7 @@
 import { world, Vector3, BlockPermutation } from "@minecraft/server";
 import { MinecraftBlockTypes } from "@minecraft/vanilla-data";
 import { BlockIO } from "../BlockIO";
-import { Block, Blocks } from "../Types/Blocks";
+import { Block, BlockType } from "../Types/Blocks";
 import Point from "../Types/Position";
 import { getBlockId, MinecraftBlockRegistry } from "./MinecraftBlockRegistry";
 
@@ -20,13 +20,13 @@ export class MinecraftBlockIO implements BlockIO {
    * @param position - The coordinates to place the block.
    * @param blockType - Either a Block instance or a Blocks enum value.
    */
-  public put(position: Point, blockType: Block | Blocks): void {
+  public put(position: Point, blockType: Block | BlockType): void {
     const overworld = this.getOverworldDimension();
     const targetBlock = overworld.getBlock(position as Vector3);
 
     // If blockType is a Blocks enum, convert it to a Block instance
     if (typeof blockType === "string") {
-      blockType = { id: blockType };
+      blockType = { block: blockType };
     }
 
     const minecraftBlockId = getBlockId(blockType);
@@ -50,7 +50,7 @@ export class MinecraftBlockIO implements BlockIO {
       const minecraftBlockId = targetBlock.type.id as keyof typeof MinecraftBlockTypes;
       const blockEnum = MinecraftBlockRegistry.get(minecraftBlockId);
       if (blockEnum) {
-        return { id: blockEnum }; // Return a Block instance with the enum ID
+        return { block: blockEnum }; // Return a Block instance with the enum ID
       }
     }
     return undefined;

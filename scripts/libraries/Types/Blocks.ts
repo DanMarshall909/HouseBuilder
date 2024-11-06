@@ -1,9 +1,9 @@
-export interface Block {
-  id: Blocks; // Unique identifier for the block type
+export class Block  {
+  constructor(public block: BlockType) {}
 }
 
 // Enum representing various block types without direct Minecraft references
-export enum Blocks {
+export enum BlockType {
   AcaciaButton = "AcaciaButton",
   AcaciaDoor = "AcaciaDoor",
   AcaciaFence = "AcaciaFence",

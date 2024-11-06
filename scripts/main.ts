@@ -2,9 +2,9 @@ import { world, system } from "@minecraft/server";
 import { BlockIO } from "./libraries/BlockIO";
 import { MinecraftBlockIO } from "./libraries/implementations/MinecraftBlockIO";
 import { MinecraftBlockRegistry } from "./libraries/implementations/MinecraftBlockRegistry";
-import { Blocks } from "./libraries/Types/Blocks";
+import { Block, BlockType } from "./libraries/Types/Blocks";
 import Point from "./libraries/Types/Position";
-import { getMaterial, waveFormula } from "./libraries/coolMaterial";
+import { getFunkyGlass as funkyGlass, waveFormula } from "./libraries/FunkyGlass";
 
 MinecraftBlockRegistry.initialize();
 const blockIO: BlockIO = new MinecraftBlockIO();
@@ -27,7 +27,7 @@ function drawSphere(center: Point, radius: number, tick: number, formula: (posit
 
   // Clear the blocks from the previous frame
   for (const point of previousPoints) {
-    blockIO.put(point, Blocks.Air);
+    blockIO.put(point, new Block(BlockType.Air));
   }
 
   // Iterate over a cubic region that bounds the sphere
@@ -41,9 +41,8 @@ function drawSphere(center: Point, radius: number, tick: number, formula: (posit
         if (distanceSquared >= minDistanceSquared && distanceSquared <= maxDistanceSquared) {
           const point = new Point(center.x + x, center.y + y, center.z + z);
 
-          // Use getMaterial with the chosen formula
-          const material = getMaterial(point, tick, formula);
-          blockIO.put(point, Blocks[material]);
+          const block = funkyGlass(point, tick, formula);
+          blockIO.put(point, block);
 
           // Store the point for clearing in the next frame
           currentPoints.push(point);

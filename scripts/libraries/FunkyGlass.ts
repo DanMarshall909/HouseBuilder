@@ -1,6 +1,6 @@
 // MaterialSelector.ts
 
-import { Blocks } from "./Types/Blocks";
+import { Block, BlockType } from "./Types/Blocks";
 import Point from "./Types/Position";
 
 /**
@@ -10,29 +10,29 @@ import Point from "./Types/Position";
  * @param formula - A function that takes position and index and returns an index for the color array.
  * @returns A `Blocks` key representing a glass color.
  */
-export function getMaterial(
+export function getFunkyGlass(
   position: Point,
   index: number,
   formula: (position: Point, index: number) => number
-): keyof typeof Blocks {
-  const materials: (keyof typeof Blocks)[] = [
-    "RedStainedGlass",
-    "OrangeStainedGlass",
-    "YellowStainedGlass",
-    "LimeStainedGlass",
-    "GreenStainedGlass",
-    "CyanStainedGlass",
-    "LightBlueStainedGlass",
-    "BlueStainedGlass",
-    "PurpleStainedGlass",
-    "MagentaStainedGlass",
-    "PinkStainedGlass",
-    "WhiteStainedGlass",
+): Block {
+  const materials: BlockType[] = [
+    BlockType.RedStainedGlass,
+    BlockType.OrangeStainedGlass,
+    BlockType.YellowStainedGlass,
+    BlockType.LimeStainedGlass,
+    BlockType.GreenStainedGlass,
+    BlockType.CyanStainedGlass,
+    BlockType.LightBlueStainedGlass,
+    BlockType.BlueStainedGlass,
+    BlockType.PurpleStainedGlass,
+    BlockType.MagentaStainedGlass,
+    BlockType.PinkStainedGlass,
+    BlockType.WhiteStainedGlass,
   ];
 
   // Use the provided formula to calculate the material index
   const colorIndex = Math.abs(formula(position, index) % materials.length);
-  return materials[colorIndex];
+  return new Block(materials[colorIndex]);
 }
 
 /**

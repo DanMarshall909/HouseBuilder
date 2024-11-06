@@ -1,21 +1,21 @@
 // MinecraftAdapter.ts
 
 import { MinecraftBlockTypes } from "@minecraft/vanilla-data";
-import { Block, Blocks } from "../Types/Blocks";
+import { Block, BlockType } from "../Types/Blocks";
 /**
  * Registry to maintain the mapping between Blocks enum and MinecraftBlockTypes.
  */
 export class MinecraftBlockRegistry {
-  private static blockMap: Map<Blocks, keyof typeof MinecraftBlockTypes> = new Map();
+  private static blockMap: Map<BlockType, keyof typeof MinecraftBlockTypes> = new Map();
 
   /**
    * Initializes the mapping between Blocks enum and MinecraftBlockTypes at runtime.
    */
   public static initialize(): void {
-    Object.keys(Blocks).forEach((key) => {
+    Object.keys(BlockType).forEach((key) => {
       const minecraftType = MinecraftBlockTypes[key as keyof typeof MinecraftBlockTypes];
       if (minecraftType) {
-        this.blockMap.set(Blocks[key as keyof typeof Blocks], key as keyof typeof MinecraftBlockTypes);
+        this.blockMap.set(BlockType[key as keyof typeof BlockType], key as keyof typeof MinecraftBlockTypes);
       } else {
         console.warn(`MinecraftBlockTypes does not contain a type for: ${key}`);
       }
@@ -27,7 +27,7 @@ export class MinecraftBlockRegistry {
    * @param blockType - The custom Block type.
    * @returns The corresponding MinecraftBlockTypes key or undefined.
    */
-  public static getMinecraftBlockId(blockType: Blocks): keyof typeof MinecraftBlockTypes | undefined {
+  public static getMinecraftBlockId(blockType: BlockType): keyof typeof MinecraftBlockTypes | undefined {
     return this.blockMap.get(blockType);
   }
 
@@ -36,7 +36,7 @@ export class MinecraftBlockRegistry {
    * @param minecraftBlockId - The MinecraftBlockTypes key.
    * @returns The corresponding custom Block type or undefined.
    */
-  public static get(blockId: keyof typeof MinecraftBlockTypes): Blocks | undefined {
+  public static get(blockId: keyof typeof MinecraftBlockTypes): BlockType | undefined {
     for (const [block, mcId] of this.blockMap.entries()) {
       if (mcId === blockId) {
         return block;
@@ -52,7 +52,7 @@ export class MinecraftBlockRegistry {
  * @returns The corresponding MinecraftBlockTypes ID or undefined if not found.
  */
 export function getBlockId(blockType: Block): keyof typeof MinecraftBlockTypes | undefined {
-  const blockEnum = Blocks[blockType.id as keyof typeof Blocks];
+  const blockEnum = BlockType[blockType.block as keyof typeof BlockType];
   return MinecraftBlockRegistry.getMinecraftBlockId(blockEnum);
 }
 
