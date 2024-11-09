@@ -1,6 +1,6 @@
 import { world, Vector3, BlockPermutation } from "@minecraft/server";
 import { MinecraftBlockTypes } from "@minecraft/vanilla-data";
-import { BlockIO } from "../BlockIO";
+import { IBlockIO } from "../BlockIO";
 import { Block, BlockType } from "../Types/Blocks";
 import Point from "../Types/Position";
 import { getBlockId, MinecraftBlockRegistry } from "./MinecraftBlockRegistry";
@@ -9,7 +9,7 @@ import { getBlockId, MinecraftBlockRegistry } from "./MinecraftBlockRegistry";
  * Implementation of BlockIO using Minecraft's specific API.
  */
 
-export class MinecraftBlockIO implements BlockIO {
+export class MinecraftBlockIO implements IBlockIO {
   // Retrieve the Overworld dimension in Minecraft.
   private getOverworldDimension() {
     return world.getDimension("overworld");

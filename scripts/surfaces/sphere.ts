@@ -1,4 +1,4 @@
-import { BlockIO } from "../libraries/BlockIO";
+import { IBlockIO } from "../libraries/BlockIO";
 import { Block, BlockType } from "../libraries/Types/Blocks";
 import Point from "../libraries/Types/Position";
 
@@ -11,7 +11,13 @@ let previousPoints: Point[] = []; // Store the points of the previous frame to c
  * @param tick - The current tick for animation purposes.
  * @param formula - The formula function used to select colors.
  */
-export function drawSphere(blockIO: BlockIO, center: Point, radius: number, tick: number, formula: (position: Point, index: number) => Block) {
+export function drawSphere(
+  blockIO: IBlockIO,
+  center: Point,
+  radius: number,
+  tick: number,
+  formula: (position: Point, index: number) => Block
+) {
   const currentPoints: Point[] = []; // Store the points for the current frame
   const minDistanceSquared = (radius - 1) * (radius - 1);
   const maxDistanceSquared = (radius + 1) * (radius + 1);
