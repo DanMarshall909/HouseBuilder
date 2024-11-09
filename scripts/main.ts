@@ -19,7 +19,7 @@ function mainTick() {
 
   // Draw a sphere with a center point, radius, tick count and block type
   // drawSphere(BlockBuffer, center, 20, system.currentTick, DynamicBlock.funkyGlassSelectors.Wave);
-  let houseBuilder = new HouseBuilder(BlockBuffer);
+  let houseBuilder = new HouseBuilder(BlockBuffer, new Point());
 
   houseBuilder.render(anchor);
 

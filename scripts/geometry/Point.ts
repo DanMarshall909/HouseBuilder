@@ -1,7 +1,13 @@
 // Point.ts
-import { Prism } from "./Prism";
+import {Prism} from "./Prism";
 
-export class Point {
+export interface IPoint {
+  x: number;
+  y: number;
+  z: number;
+}
+
+export class Point implements IPoint {
   x: number;
   y: number;
   z: number;

@@ -1,17 +1,16 @@
 import { Anchor } from "./Anchor";
-import {Point} from "./geometry/Point";
+import {IPoint, Point} from "./geometry/Point";
 import {IBlockBuffer} from "./IBlockBuffer";
 
 export class HouseBuilder {
   BlockBuffer: IBlockBuffer;
   anchor: Anchor;
-  constructor(BlockBuffer: IBlockBuffer) {
+  constructor(BlockBuffer: IBlockBuffer, position: IPoint) {
     this.BlockBuffer = BlockBuffer;
-    this.anchor = new Anchor();
+    this.anchor = new Anchor(position);
   }
 
   render(anchorPoint: Point) {
-    // start with the anchor and draw each dependent child component and their children
     this.anchor.render();
   }
 }
