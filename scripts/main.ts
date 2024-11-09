@@ -5,7 +5,7 @@ import { MinecraftBlockRegistry } from "./libraries/implementations/MinecraftBlo
 import Point from "./libraries/Types/Position";
 import { drawSphere } from "./surfaces/sphere";
 import { DynamicBlock } from "./libraries/ColorBlockSelector"; // Make sure to export and import ColorBlockSelector
-import { HouseBuilder } from "./HouseBuilder.1";
+import { HouseBuilder } from "./HouseBuilder";
 
 // Initialize the block registry for use
 MinecraftBlockRegistry.initialize();
