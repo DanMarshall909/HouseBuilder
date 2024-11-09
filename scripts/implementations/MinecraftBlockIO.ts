@@ -1,8 +1,8 @@
 import { world, Vector3, BlockPermutation } from "@minecraft/server";
 import { MinecraftBlockTypes } from "@minecraft/vanilla-data";
 import { IBlockIO } from "../BlockIO";
-import { Block, BlockType } from "../Types/Blocks";
-import Point from "../Types/Position";
+import { Block, BlockType } from "../types/Blocks";
+import Point from "../geometry/Point";
 import { getBlockId, MinecraftBlockRegistry } from "./MinecraftBlockRegistry";
 
 /**

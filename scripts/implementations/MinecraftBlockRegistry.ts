@@ -1,7 +1,7 @@
 // MinecraftAdapter.ts
 
 import { MinecraftBlockTypes } from "@minecraft/vanilla-data";
-import { Block, BlockType } from "../Types/Blocks";
+import { Block, BlockType } from "../types/Blocks";
 /**
  * Registry to maintain the mapping between Blocks enum and MinecraftBlockTypes.
  */

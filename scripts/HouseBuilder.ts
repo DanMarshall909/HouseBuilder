@@ -1,6 +1,6 @@
 import { Anchor } from "./Anchor";
 import { IBlockIO } from "./libraries/BlockIO";
-import Point from "./libraries/Types/Position";
+import Point from "./libraries/geometry/Point";
 
 export class HouseBuilder {
   blockIO: IBlockIO;

@@ -2,8 +2,8 @@ import { world, system } from "@minecraft/server";
 import { IBlockIO } from "./libraries/BlockIO";
 import { MinecraftBlockIO } from "./libraries/implementations/MinecraftBlockIO";
 import { MinecraftBlockRegistry } from "./libraries/implementations/MinecraftBlockRegistry";
-import Point from "./libraries/Types/Position";
-import { drawSphere } from "./surfaces/sphere";
+import Point from "./libraries/geometry/Point";
+import { drawSphere } from "./libraries/geometry/surfaces/sphere";
 import { DynamicBlock } from "./libraries/ColorBlockSelector"; // Make sure to export and import ColorBlockSelector
 import { HouseBuilder } from "./HouseBuilder";
 

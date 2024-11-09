@@ -1,7 +1,7 @@
 // MaterialSelector.ts
 
-import { Block, BlockType } from "./Types/Blocks";
-import Point, { IPoint } from "./Types/Position";
+import { Block, BlockType } from "./types/Blocks";
+import Point, { IPoint } from "./geometry/Point";
 
 // Array of glass block types for colorful selection.
 const funkyGlassBlockTypes: BlockType[] = [

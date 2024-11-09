@@ -1,5 +1,5 @@
-import { Block, BlockType } from "./Types/Blocks";
-import Point from "./Types/Position";
+import { Point } from "./geometry/Point";
+import { Block, BlockType } from "./types/Blocks";
 
 // Interface for abstract block operations
 export interface IBlockIO {

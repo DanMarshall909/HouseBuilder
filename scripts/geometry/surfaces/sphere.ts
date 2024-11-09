@@ -1,6 +1,6 @@
-import { IBlockIO } from "../libraries/BlockIO";
-import { Block, BlockType } from "../libraries/Types/Blocks";
-import Point from "../libraries/Types/Position";
+import { IBlockIO } from "../../BlockIO";
+import { Block, BlockType } from "../../types/Blocks";
+import Point from "../Point";
 
 let previousPoints: Point[] = []; // Store the points of the previous frame to clear them
 
