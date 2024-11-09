@@ -1,8 +1,8 @@
-import {IBlockIO} from "./BlockIO";
 import {Block} from "./types/Blocks";
 import {Point} from "./geometry/Point";
+import {IBlockBuffer} from "./IBlockBuffer";
 
-export class TestIO implements IBlockIO {
+export class BlockBuffer implements IBlockBuffer {
     private world: Map<string, Block> = new Map();
 
     asText(): string {
@@ -17,5 +17,9 @@ export class TestIO implements IBlockIO {
     get(position: Point): Block | undefined {
         const key = `${position.x},${position.y},${position.z}`;
         return this.world.get(key);
+    }
+
+    allBlocks() {
+        return Array.from(this.world, ([key, value]) => value);
     }
 }

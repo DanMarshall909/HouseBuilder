@@ -1,15 +1,15 @@
 import { world, system } from "@minecraft/server";
-import { IBlockIO } from "./libraries/BlockIO";
-import { MinecraftBlockIO } from "./libraries/implementations/MinecraftBlockIO";
-import { MinecraftBlockRegistry } from "./libraries/implementations/MinecraftBlockRegistry";
-import Point from "./libraries/geometry/Point";
-import { drawSphere } from "./libraries/geometry/surfaces/sphere";
-import { DynamicBlock } from "./libraries/ColorBlockSelector"; // Make sure to export and import ColorBlockSelector
+import { IBlockBuffer } from "./BlockBuffer";
+import { MinecraftBlockBuffer } from "./implementations/MinecraftBlockBuffer";
+import { MinecraftBlockRegistry } from "./implementations/MinecraftBlockRegistry";
+import Point from "./geometry/Point";
+import { drawSphere } from "./geometry/surfaces/sphere";
+import { DynamicBlock } from "./ColorBlockSelector"; // Make sure to export and import ColorBlockSelector
 import { HouseBuilder } from "./HouseBuilder";
 
 // Initialize the block registry for use
 MinecraftBlockRegistry.initialize();
-const blockIO: IBlockIO = new MinecraftBlockIO();
+const BlockBuffer: IBlockBuffer = new MinecraftBlockBuffer();
 
 function mainTick() {
   const anchor = new Point(40, -40, 0);
@@ -18,8 +18,8 @@ function mainTick() {
   const index = system.currentTick % 100; // Example index that changes with the tick
 
   // Draw a sphere with a center point, radius, tick count and block type
-  // drawSphere(blockIO, center, 20, system.currentTick, DynamicBlock.funkyGlassSelectors.Wave);
-  let houseBuilder = new HouseBuilder(blockIO);
+  // drawSphere(BlockBuffer, center, 20, system.currentTick, DynamicBlock.funkyGlassSelectors.Wave);
+  let houseBuilder = new HouseBuilder(BlockBuffer);
 
   houseBuilder.render(anchor);
 

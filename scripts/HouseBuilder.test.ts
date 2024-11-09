@@ -1,35 +1,53 @@
-import {TestIO} from "./TestIO";
+import {BlockBuffer} from "./BlockBuffer";
 import {Point} from "./geometry/Point";
 import {BlockType} from "./types/Blocks";
+import {HouseBuilder} from "./HouseBuilder";
 
 
-describe("TestIO", () => {
-	let testIO: TestIO;
-	
-	beforeEach(() => {
-		testIO = new TestIO();
-	});
-	
-  it("should store and retrieve a block", () => {
-    const point = new Point(1, 2, 3);
+describe("HouseBuilder", () => {
+    let houseBuilder: HouseBuilder;
 
-    testIO.put(point, { block: BlockType.Stone });
-    const retrievedBlock = testIO.get(point);
+    let blockBuffer: BlockBuffer;
+    beforeEach(() => {
+        blockBuffer = new BlockBuffer();
+        houseBuilder = new HouseBuilder(blockBuffer);
+    });
 
-    expect(retrievedBlock).toEqual({ block: BlockType.Stone });
-  });
+    it("renders an empty house at a given anchor point", () => {
+        let anchor = new Point(1, 2, 3);
+        houseBuilder.render(anchor)
 
-  it("should return undefined for non-existent block", () => {
-    const point = new Point(4, 5, 6);
-    const retrievedBlock = testIO.get(point);
+        expect(blockBuffer.allBlocks()).toEqual([]);
+    });
 
-    expect(retrievedBlock).toBeUndefined();
-  });
+    describe("TestIO", () => {
+        let testIO: BlockBuffer;
 
-  it("should output correct text representation", () => {
-    const point = new Point(1, 2, 3); 
+        beforeEach(() => {
+            testIO = new BlockBuffer();
+        });
 
-    testIO.put(point, { block: BlockType.Stone });
-    expect(testIO.asText()).toBe("1,2,3: Stone");
-  });
+        it("stores and retrieves a block", () => {
+            const point = new Point(1, 2, 3);
+
+            testIO.put(point, {block: BlockType.Stone});
+            const retrievedBlock = testIO.get(point);
+
+            expect(retrievedBlock).toEqual({block: BlockType.Stone});
+        });
+
+        it("returns undefined for non-existent block", () => {
+            const point = new Point(4, 5, 6);
+            const retrievedBlock = testIO.get(point);
+
+            expect(retrievedBlock).toBeUndefined();
+        });
+
+        it("outputs correct text representation", () => {
+            const point = new Point(1, 2, 3);
+
+            testIO.put(point, {block: BlockType.Stone});
+            expect(testIO.asText()).toBe("1,2,3: Stone");
+        });
+    })
 });
