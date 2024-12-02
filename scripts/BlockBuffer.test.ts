@@ -26,9 +26,9 @@ describe("BlockBuffer", () => {
     });
 
     it("outputs correct text representation", () => {
-        const point = new Point(1, 2, 3);
-
-        blockBuffer.put(point, {block: BlockType.Stone});
-        expect(blockBuffer.asText()).toBe("1,2,3: Stone");
+        blockBuffer.put(new Point(1, 2, 3), {block: BlockType.Stone});
+        blockBuffer.put(new Point(2, 2, 3), {block: BlockType.BrickBlock});
+        let actual = blockBuffer.asText();
+        expect(actual).toBe("1,2,3: Stone\n2,2,3: BrickBlock");
     });
 });

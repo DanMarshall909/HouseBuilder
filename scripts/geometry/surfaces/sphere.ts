@@ -1,4 +1,4 @@
-import { IBlockBuffer } from "../../BlockBuffer";
+import { IBlockIO } from "../../BlockBuffer";
 import { Block, BlockType } from "../../types/Blocks";
 import Point from "../Point";
 

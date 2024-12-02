@@ -1,11 +1,11 @@
 import { Anchor } from "./Anchor";
 import {IPoint, Point} from "./geometry/Point";
-import {IBlockBuffer} from "./IBlockBuffer";
+import {IBlockIO} from "./IBlockIO";
 
 export class HouseBuilder {
-  BlockBuffer: IBlockBuffer;
+  BlockBuffer: IBlockIO;
   anchor: Anchor;
-  constructor(BlockBuffer: IBlockBuffer, position: IPoint) {
+  constructor(BlockBuffer: IBlockIO, position: IPoint) {
     this.BlockBuffer = BlockBuffer;
     this.anchor = new Anchor(position);
   }

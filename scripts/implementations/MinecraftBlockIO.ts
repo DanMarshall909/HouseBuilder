@@ -1,15 +1,15 @@
 import { world, Vector3, BlockPermutation } from "@minecraft/server";
 import { MinecraftBlockTypes } from "@minecraft/vanilla-data";
-import { IBlockBuffer } from "../BlockBuffer";
 import { Block, BlockType } from "../types/Blocks";
-import Point from "../geometry/Point";
 import { getBlockId, MinecraftBlockRegistry } from "./MinecraftBlockRegistry";
+import {IBlockIO} from "../IBlockIO";
+import {Point} from "../geometry/Point";
 
 /**
  * Implementation of BlockBuffer using Minecraft's specific API.
  */
 
-export class MinecraftBlockBuffer implements IBlockBuffer {
+export class MinecraftBlockBuffer implements IBlockIO {
   // Retrieve the Overworld dimension in Minecraft.
   private getOverworldDimension() {
     return world.getDimension("overworld");

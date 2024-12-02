@@ -1,5 +1,5 @@
 import { world, system } from "@minecraft/server";
-import { IBlockBuffer } from "./BlockBuffer";
+import { IBlockIO } from "./BlockBuffer";
 import { MinecraftBlockBuffer } from "./implementations/MinecraftBlockBuffer";
 import { MinecraftBlockRegistry } from "./implementations/MinecraftBlockRegistry";
 import Point from "./geometry/Point";
