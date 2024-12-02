@@ -1,28 +1,41 @@
-import {Block} from "./types/Blocks";
+import {Block, BlockType} from "./types/Blocks";
 import {Point} from "./geometry/Point";
 import {IBlockIO} from "./IBlockIO";
+import {TextBlockIO} from "./implementations/TextBlockBuffer";
 
-export class BlockBuffer implements IBlockIO {
+export class BlockBuffer {
+
     get allBlocks(): () => Block[] {
         return this._allBlocks;
     }
 
-    private blocks: Map<string, Block> = new Map();
+    private blocks: Map<Point, Block> = new Map();
 
-    put(position: Point, blockType: Block): void {
-        const key = `${position.x},${position.y},${position.z}`;
-        this.blocks.set(key, blockType);
+    putPoint(position: Point, blockType: BlockType): void {
+        this.blocks.set(position, new Block(blockType));
+    }
+
+    putXYZ(x: number, y: number, z: number, blockType: BlockType): void {
+        this.putPoint(new Point(x, y, z), blockType);
     }
 
     get(position: Point): Block | undefined {
-        const key = `${position.x},${position.y},${position.z}`;
-        return this.blocks.get(key);
+        return this.blocks.get(position);
     }
 
     private _allBlocks = () =>
         Array.from(this.blocks, ([key, value]) => value);
 
-    asText(): string {
-        return Array.from(this.blocks, ([key, value]) => `${key}: ${value.block.trim()}`).join('\n');
+    clear(): void {
+        for (const point of this.blocks.keys()) {
+            this.putPoint(point, BlockType.Air);
+        }
+        this.blocks.clear();
+    }
+
+    render(io: IBlockIO) {
+        this.blocks.forEach((value, key) => {
+            io.put(key, value);
+        });
     }
 }

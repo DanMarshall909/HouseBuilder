@@ -4,12 +4,14 @@ import { Block, BlockType } from "../types/Blocks";
 import { getBlockId, MinecraftBlockRegistry } from "./MinecraftBlockRegistry";
 import {IBlockIO} from "../IBlockIO";
 import {Point} from "../geometry/Point";
+import {BlockBuffer} from "../BlockBuffer";
 
 /**
  * Implementation of BlockBuffer using Minecraft's specific API.
  */
 
-export class MinecraftBlockBuffer implements IBlockIO {
+export class MinecraftBlockIO implements IBlockIO {
+  
   // Retrieve the Overworld dimension in Minecraft.
   private getOverworldDimension() {
     return world.getDimension("overworld");

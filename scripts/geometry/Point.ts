@@ -30,4 +30,7 @@ export class Point implements IPoint {
       corner2: new Point(this.x + rangeXZ, this.y + rangeY, this.z + rangeXZ),
     };
   }
+  public asText(): string {
+    return `${this.x},${this.y},${this.z}`
+  }
 }
