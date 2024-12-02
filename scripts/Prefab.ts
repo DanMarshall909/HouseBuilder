@@ -1,11 +1,19 @@
-export abstract class Prefab {
-  protected children: Prefab[] = [];
-  abstract draw(): void;
+import {Orientation} from "./geometry/Point";
 
-  render() {
-    this.draw();
-    for (const child of this.children) {
-      child.render();
+export abstract class Prefab {
+    protected constructor(orientation: Orientation) {
+        this.orientation = orientation;
     }
-  }
+
+    public orientation: Orientation;
+    protected readonly children: Prefab[] = [];
+
+    abstract draw(): void;
+
+    render() {
+        this.draw();
+        for (const child of this.children) {
+            child.render();
+        }
+    }
 }

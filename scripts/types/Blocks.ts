@@ -1223,3 +1223,25 @@ export enum BlockType {
   YellowWool = "YellowWool",
   ZombieHead = "ZombieHead",
 }
+
+export type DoorType =
+    BlockType.AcaciaDoor |
+    BlockType.BambooDoor |
+    BlockType.BirchDoor |
+    BlockType.CherryDoor |
+    BlockType.CopperDoor |
+    BlockType.CrimsonDoor |
+    BlockType.DarkOakDoor |
+    BlockType.ExposedCopperDoor |
+    BlockType.IronDoor |
+    BlockType.JungleDoor |
+    BlockType.MangroveDoor |
+    BlockType.OxidizedCopperDoor |
+    BlockType.SpruceDoor |
+    BlockType.WarpedDoor |
+    BlockType.WaxedCopperDoor |
+    BlockType.WaxedExposedCopperDoor |
+    BlockType.WaxedOxidizedCopperDoor |
+    BlockType.WaxedWeatheredCopperDoor |
+    BlockType.WeatheredCopperDoor |
+    BlockType.WoodenDoor;

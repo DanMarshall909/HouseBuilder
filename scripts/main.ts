@@ -20,7 +20,7 @@ function mainTick() {
     // drawSphere(BlockBuffer, center, 20, system.currentTick, DynamicBlock.funkyGlassSelectors.Wave);
     let houseBuilder = new HouseBuilder(blockBuffer, new Point());
 
-    houseBuilder.render(anchor);
+    houseBuilder.buildAt(anchor);
 
     // Continue running mainTick every server tick
     system.run(mainTick);
