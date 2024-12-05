@@ -1,10 +1,10 @@
 import { world, Vector3, BlockPermutation } from "@minecraft/server";
 import { MinecraftBlockTypes } from "@minecraft/vanilla-data";
-import { Block, BlockType } from "../types/Blocks";
+import { BlockType } from "../types/Blocks";
 import { getBlockId, MinecraftBlockRegistry } from "./MinecraftBlockRegistry";
-import {IBlockIO} from "../IBlockIO";
 import {Point} from "../geometry/Point";
-import {BlockBuffer} from "../BlockBuffer";
+import {Block} from "../types/Block";
+import {IBlockIO} from "../io/IBlockIO";
 
 /**
  * Implementation of BlockBuffer using Minecraft's specific API.

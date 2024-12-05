@@ -1,6 +1,6 @@
-﻿import {IBlockIO} from "../IBlockIO";
-import {Point} from "../geometry/Point";
-import {Block} from "../types/Blocks";
+﻿import {Point} from "../geometry/Point";
+import {Block} from "../types/Block";
+import {IBlockIO} from "../io/IBlockIO";
 
 export class TextBlockIO implements IBlockIO {
     private _text: string = "";

@@ -1,7 +1,7 @@
 ﻿import {BlockBuffer} from "./BlockBuffer";
-import {Point} from "./geometry/Point";
-import {BlockType} from "./types/Blocks";
-import {TextBlockIO} from "./implementations/TextBlockBuffer";
+import {Point} from "../geometry/Point";
+import {BlockType} from "../types/Blocks";
+import {TextBlockIO} from "../implementations/TextBlockBuffer";
 
 describe("BlockBuffer", () => {
     let blockBuffer: BlockBuffer;
@@ -13,7 +13,7 @@ describe("BlockBuffer", () => {
     it("stores and retrieves a block", () => {
         const point = new Point(1, 2, 3);
 
-        blockBuffer.putPoint(point, BlockType.Stone);
+        blockBuffer.put(point, BlockType.Stone);
         const retrievedBlock = blockBuffer.get(point);
 
         expect(retrievedBlock?.block).toEqual(BlockType.Stone);

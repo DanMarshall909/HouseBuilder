@@ -16,6 +16,20 @@ export class Point implements IPoint {
 
     static Zero = new Point(0, 0, 0);
 
+
+    // Generate a packed numeric key from x, y, z
+    get packedKey(): number {
+        return (this.x << 20) | (this.y << 10) | this.z;
+    }
+
+    // Decode a packed numeric key back to a Point
+    static fromPackedKey(key: number): Point {
+        const x = key >> 20;
+        const y = (key >> 10) & 0x3FF; // Extract 10 bits for y
+        const z = key & 0x3FF;         // Extract 10 bits for z
+        return new Point(x, y, z);
+    }
+
     constructor(x: number = 0, y: number = 0, z: number = 0) {
         this.x = x;
         this.y = y;
@@ -40,11 +54,11 @@ export class Point implements IPoint {
     }
 }
 
-export class Orientation {
+export class Vector {
     public rotation: Rotation = 0;
     public offset: IPoint = {x: 0, y: 0, z: 0};
 
-    static Same: Orientation = new Orientation(Point.Zero, 0);
+    static Zero: Vector = new Vector(Point.Zero, 0);
 
     constructor(offset: IPoint, rotation: Rotation) {
         this.rotation = rotation;

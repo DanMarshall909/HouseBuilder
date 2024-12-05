@@ -1,17 +1,21 @@
-import { Anchor } from "./Anchor";
-import {IPoint, Orientation, Point} from "./geometry/Point";
-import {IBlockIO} from "./IBlockIO";
-import {BlockBuffer} from "./BlockBuffer";
+import {Anchor} from "./prefabs/Anchor";
+import {Point, Vector} from "./geometry/Point";
+import {BlockBuffer} from "./io/BlockBuffer";
+import {BlockType} from "./types/Blocks";
 
 export class HouseBuilder {
-  BlockBuffer: BlockBuffer;
-  public Anchor: Anchor;
-  constructor(blockBuffer: BlockBuffer, orientation: Orientation) {
-    this.BlockBuffer = blockBuffer;
-    this.Anchor = new Anchor(orientation, blockBuffer);
-  }
+    public anchor: Anchor;
 
-  buildAt(anchorPoint: Point) {
-    this.Anchor.render();
-  }
+    constructor(public blockBuffer: BlockBuffer, public orientation: Vector) {
+        this.anchor = new Anchor(orientation);
+        this.putBuffer = this.putBuffer.bind(this); // Ensure correct context
+    }
+
+    build() {
+        this.anchor.build(this.orientation, this.putBuffer);
+    }
+
+    private putBuffer(orientation: Vector, position: Point, blockType: BlockType) {
+        this.blockBuffer.putOffset(position, orientation, blockType);
+    }
 }
