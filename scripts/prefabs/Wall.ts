@@ -15,14 +15,19 @@ export class Wall extends Prefab {
   }
 
   draw(put: PutFunc): void {
-    // Place blocks in a line starting from the orientation point
+    // Place blocks in a line based on the wall's orientation
     for (let i = 0; i < this.length; i++) {
-      put(this.orientation, new Point(i + 1, 0, 0), this.material);
+      const offset = i + 1;
+      const blockPoint = this.getOffsetPoint(offset);
+      put(this.orientation, blockPoint, this.material);
     }
   }
 
   getOrientationForChildPrefab(): Orientation {
-    // Create a new orientation at the end of the wall
-    return new Orientation(new Point(this.length, 0, 0), this.orientation.rotation);
+    // Calculate the end point of the wall in its local coordinate system
+    const endPoint = this.getOffsetPoint(this.length);
+
+    // Convert to world coordinates and create new orientation
+    return new Orientation(this.localToWorld(endPoint), this.orientation.rotation);
   }
 }

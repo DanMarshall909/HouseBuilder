@@ -12,15 +12,40 @@ export class BlockBuffer {
     return () => Array.from(this.blocks.values());
   }
 
-  // Add a block with an offset applied to the given point and vector
-  putOffset(
-    { x: px, y: py, z: pz }: Point,
-    { rotation, point: { x: ox, y: oy, z: oz } }: Orientation,
-    blockType: BlockType
-  ): void {
-    const newX = px + (rotation === 0 || rotation === 180 ? ox : rotation === 90 ? oz : -oz);
-    const newZ = pz + (rotation === 0 || rotation === 180 ? oz : rotation === 90 ? -ox : ox);
-    this.put(new Point(newX, py + oy, newZ), blockType);
+  // Add a block with an offset applied to the given point and orientation
+  putOffset(position: Point, orientation: Orientation, blockType: BlockType): void {
+    const { x: px, y: py, z: pz } = position;
+    const {
+      rotation,
+      point: { x: ox, y: oy, z: oz },
+    } = orientation;
+
+    // Calculate new position based on rotation
+    let newX, newZ;
+    switch (rotation) {
+      case 0: // No rotation
+        newX = px + ox;
+        newZ = pz + oz;
+        break;
+      case 90: // Rotate clockwise
+        newX = px + oz;
+        newZ = pz + ox;
+        break;
+      case 180: // Rotate 180 degrees
+        newX = px - ox;
+        newZ = pz - oz;
+        break;
+      case 270: // Rotate counterclockwise
+        newX = px + oz;
+        newZ = pz - ox;
+        break;
+      default:
+        throw new Error(`Invalid rotation: ${rotation}`);
+    }
+
+    const finalPoint = new Point(newX, py + oy, newZ);
+    console.log(`Placing block at ${finalPoint.asText()} with rotation ${rotation}`);
+    this.put(finalPoint, blockType);
   }
 
   // Add a block using x, y, z coordinates directly

@@ -19,7 +19,8 @@ export class Anchor extends Prefab {
 
   protected children: Prefab[] = [];
 
-  addDoor(type: DoorType) {
+  addDoor(type: DoorType): this {
     this.children.push(new Door(this.orientation, type, this.factory));
+    return this;
   }
 }
