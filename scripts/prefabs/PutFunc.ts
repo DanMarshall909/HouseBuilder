@@ -1,5 +1,4 @@
-﻿import {Point, Vector} from "../geometry/Point";
-import {BlockType} from "../types/Blocks";
+﻿import { Point, Orientation } from "../geometry/Point";
+import { BlockType } from "../types/Blocks";
 
-
-export type PutFunc = (orientation: Vector, position: Point, blockType: BlockType) => void;
+export type PutFunc = (orientation: Orientation, position: Point, blockType: BlockType) => void;

@@ -1,12 +1,12 @@
 import { Prefab } from "./Prefab";
 import { BlockType } from "../types/Blocks";
-import { Vector, Point } from "../geometry/Point";
+import { Orientation, Point } from "../geometry/Point";
 import { PutFunc } from "./PutFunc";
 import { PrefabFactory, defaultPrefabFactory } from "./PrefabFactory";
 
 export class Wall extends Prefab {
   constructor(
-    public readonly orientation: Vector,
+    public readonly orientation: Orientation,
     public readonly material: BlockType,
     public readonly length: number,
     factory: PrefabFactory = defaultPrefabFactory
@@ -19,5 +19,10 @@ export class Wall extends Prefab {
     for (let i = 0; i < this.length; i++) {
       put(this.orientation, new Point(i + 1, 0, 0), this.material);
     }
+  }
+
+  getOrientationForChildPrefab(): Orientation {
+    // Create a new orientation at the end of the wall
+    return new Orientation(new Point(this.length, 0, 0), this.orientation.rotation);
   }
 }

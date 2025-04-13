@@ -1,12 +1,16 @@
 import { Prefab } from "./Prefab";
-import { Vector } from "../geometry/Point";
+import { Orientation } from "../geometry/Point";
 import { DoorType } from "../types/Blocks";
 import { Door } from "./Door";
 import { PrefabFactory, defaultPrefabFactory } from "./PrefabFactory";
 
 export class Anchor extends Prefab {
-  constructor(orientation: Vector, factory: PrefabFactory = defaultPrefabFactory) {
+  constructor(orientation: Orientation, factory: PrefabFactory = defaultPrefabFactory) {
     super(orientation, factory);
+  }
+
+  getOrientationForChildPrefab(): Orientation {
+    return this.orientation;
   }
 
   draw(): void {

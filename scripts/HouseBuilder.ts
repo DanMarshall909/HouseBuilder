@@ -1,4 +1,4 @@
-import { Point, Vector } from "./geometry/Point";
+import { Point, Orientation } from "./geometry/Point";
 import { BlockBuffer } from "./io/BlockBuffer";
 import { BlockType } from "./types/Blocks";
 import { Anchor, PrefabFactory, defaultPrefabFactory } from "./prefabs";
@@ -9,7 +9,7 @@ export class HouseBuilder {
 
   constructor(
     public blockBuffer: BlockBuffer,
-    public orientation: Vector,
+    public orientation: Orientation,
     factory: PrefabFactory = defaultPrefabFactory
   ) {
     this.factory = factory;
@@ -21,7 +21,7 @@ export class HouseBuilder {
     this.anchor.build(this.orientation, this.putBuffer);
   }
 
-  private putBuffer(orientation: Vector, position: Point, blockType: BlockType) {
+  private putBuffer(orientation: Orientation, position: Point, blockType: BlockType) {
     this.blockBuffer.putOffset(position, orientation, blockType);
   }
 }

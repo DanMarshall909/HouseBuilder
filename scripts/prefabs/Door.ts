@@ -1,12 +1,12 @@
 import { Prefab } from "./Prefab";
 import { DoorType } from "../types/Blocks";
-import { Vector, Point } from "../geometry/Point";
+import { Orientation, Point } from "../geometry/Point";
 import { PutFunc } from "./PutFunc";
 import { PrefabFactory, defaultPrefabFactory } from "./PrefabFactory";
 
 export class Door extends Prefab {
   constructor(
-    public readonly orientation: Vector = Vector.Zero,
+    public readonly orientation: Orientation = Orientation.Zero,
     public type: DoorType,
     factory: PrefabFactory = defaultPrefabFactory
   ) {
@@ -15,5 +15,9 @@ export class Door extends Prefab {
 
   draw(put: PutFunc): void {
     put(this.orientation, Point.Zero, this.type);
+  }
+
+  getOrientationForChildPrefab(): Orientation {
+    return this.orientation;
   }
 }

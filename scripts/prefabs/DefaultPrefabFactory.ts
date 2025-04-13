@@ -1,11 +1,11 @@
-import { Vector } from "../geometry/Point";
+import { Orientation } from "../geometry/Point";
 import { BlockType } from "../types/Blocks";
 import { PrefabFactory, defaultPrefabFactory } from "./PrefabFactory";
 import { Wall } from "./Wall";
 import { IPrefab } from "./IPrefab";
 
 class DefaultPrefabFactory implements PrefabFactory {
-  createWall(orientation: Vector, material: BlockType, length: number): IPrefab {
+  createWall(orientation: Orientation, material: BlockType, length: number): IPrefab {
     return new Wall(orientation, material, length);
   }
 }
