@@ -15,7 +15,7 @@ export class BlockBuffer {
   // Add a block with an offset applied to the given point and vector
   putOffset(
     { x: px, y: py, z: pz }: Point,
-    { rotation, offset: { x: ox, y: oy, z: oz } }: Orientation,
+    { rotation, point: { x: ox, y: oy, z: oz } }: Orientation,
     blockType: BlockType
   ): void {
     const newX = px + (rotation === 0 || rotation === 180 ? ox : rotation === 90 ? oz : -oz);

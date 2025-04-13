@@ -55,12 +55,12 @@ export class Point implements IPoint {
 
 export class Orientation {
   public rotation: Rotation = 0;
-  public offset: IPoint = { x: 0, y: 0, z: 0 };
+	public point: IPoint = { x: 0, y: 0, z: 0 };
 
   static Zero: Orientation = new Orientation(Point.Zero, 0);
 
   constructor(offset: IPoint, rotation: Rotation) {
     this.rotation = rotation;
-    this.offset = offset;
+    this.point = offset;
   }
 }
