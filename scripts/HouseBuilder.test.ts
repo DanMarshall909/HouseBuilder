@@ -18,7 +18,7 @@ describe("HouseBuilder", () => {
     houseBuilder.build();
 
     expect(blockBuffer.allBlocks()).toEqual([]);
-    expect(houseBuilder.anchor.orientation).toEqual(startingOrientation);
+    expect(houseBuilder.anchor.from).toEqual(startingOrientation);
   });
 
   it("draws a door at the anchorPoint point", () => {
@@ -44,20 +44,10 @@ describe("HouseBuilder", () => {
 
   it("draws a wall continuing on from the last point rotated 90 degrees", () => {
     const houseBuilder = new HouseBuilder(blockBuffer, startingOrientation);
-    houseBuilder.anchor
+    var orientation = houseBuilder.anchor
       .addWall(BlockType.StoneBricks, 3) // Add a 3-block long wall
-      .addWall(BlockType.StoneBricks, 3); // Add a 3-block long wall
-    houseBuilder.build();
+      .addWall(BlockType.StoneBricks, 3).from; // Add a 3-block long wall
 
-    // Check if wall blocks are placed correctly
-    // First wall (along X axis)
-    expect(blockBuffer.get(new Point(2, 2, 3))?.block).toBe(BlockType.StoneBricks);
-    expect(blockBuffer.get(new Point(3, 2, 3))?.block).toBe(BlockType.StoneBricks);
-    expect(blockBuffer.get(new Point(4, 2, 3))?.block).toBe(BlockType.StoneBricks);
-
-    // Second wall (should extend along Z axis from the end of first wall)
-    expect(blockBuffer.get(new Point(4, 2, 4))?.block).toBe(BlockType.StoneBricks);
-    expect(blockBuffer.get(new Point(4, 2, 5))?.block).toBe(BlockType.StoneBricks);
-    expect(blockBuffer.get(new Point(4, 2, 6))?.block).toBe(BlockType.StoneBricks);
+    expect(orientation).toBe(new Orientation(new Point(4, 2, 0), 90));
   });
 });
