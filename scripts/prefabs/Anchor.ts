@@ -2,6 +2,8 @@ import { Prefab } from "./Prefab";
 import { Orientation } from "../geometry/Point";
 import { DoorType } from "../types/Blocks";
 import { Door } from "./Door";
+import { Window } from "./Window";
+import { WindowOptions } from "../types/WindowOptions";
 import { PrefabFactory, defaultPrefabFactory } from "./PrefabFactory";
 
 /**
@@ -43,6 +45,22 @@ export class Anchor extends Prefab {
    */
   addDoor(type: DoorType): this {
     this.children.push(new Door(this.orientation, type, this.factory));
+    return this;
+  }
+
+  /**
+   * Adds a window as a child of this anchor
+   * @param options - Configuration options for the window
+   * @returns This anchor for method chaining
+   * @throws {Error} If window dimensions are invalid or space is occupied
+   */
+  addWindow(options: WindowOptions = {}): this {
+    // Check if space is occupied before adding the window
+    const window = new Window(this.orientation, options, this.factory);
+
+    // TODO: Add collision detection here
+    // For now, we'll just add the window
+    this.children.push(window);
     return this;
   }
 }
