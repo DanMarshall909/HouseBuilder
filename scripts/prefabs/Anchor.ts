@@ -1,16 +1,21 @@
-import {Prefab} from "./Prefab";
-import {Vector} from "../geometry/Point";
-import {DoorType} from "../types/Blocks";
-import {Door} from "./Door";
-import {BlockBuffer} from "../io/BlockBuffer";
+import { Prefab } from "./Prefab";
+import { Vector } from "../geometry/Point";
+import { DoorType } from "../types/Blocks";
+import { Door } from "./Door";
+import { PrefabFactory, defaultPrefabFactory } from "./PrefabFactory";
 
 export class Anchor extends Prefab {
-    draw(): void {
-    }
+  constructor(orientation: Vector, factory: PrefabFactory = defaultPrefabFactory) {
+    super(orientation, factory);
+  }
 
-    protected children: Prefab[] = [];
+  draw(): void {
+    // Empty implementation as Anchor is just a container
+  }
 
-    addDoor(type: DoorType) {
-        this.children.push(new Door(this.orientation, type));
-    }
+  protected children: Prefab[] = [];
+
+  addDoor(type: DoorType) {
+    this.children.push(new Door(this.orientation, type, this.factory));
+  }
 }

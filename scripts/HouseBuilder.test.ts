@@ -14,7 +14,6 @@ describe("HouseBuilder", () => {
     });
 
     it("renders an empty house at a given anchorPoint point", () => {
-
         let houseBuilder: HouseBuilder = new HouseBuilder(blockBuffer, startingOrientation);
         houseBuilder.build()
 
@@ -31,4 +30,15 @@ describe("HouseBuilder", () => {
         let actual = blockBuffer.get(anchorPoint);
         expect(actual?.block).toBe(BlockType.AcaciaDoor);
     });
-});
+
+    it("draws a wall next to the anchor point", () => {
+        const houseBuilder = new HouseBuilder(blockBuffer, startingOrientation);
+        houseBuilder.anchor.addWall(BlockType.StoneBricks, 3); // Add a 3-block long wall
+        houseBuilder.build();
+
+        // Check if wall blocks are placed correctly
+        expect(blockBuffer.get(new Point(2, 2, 3))?.block).toBe(BlockType.StoneBricks);
+        expect(blockBuffer.get(new Point(3, 2, 3))?.block).toBe(BlockType.StoneBricks);
+        expect(blockBuffer.get(new Point(4, 2, 3))?.block).toBe(BlockType.StoneBricks);
+    });
+}); 
