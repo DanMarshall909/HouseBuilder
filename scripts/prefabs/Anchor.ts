@@ -35,7 +35,7 @@ export class Anchor extends Prefab {
    * Draws nothing as the anchor is just a container
    */
   draw(): void {
-    // Empty implementation as Anchor is just a container
+    this.children.forEach((child) => child.draw());
   }
 
   /**
@@ -55,11 +55,26 @@ export class Anchor extends Prefab {
    * @throws {Error} If window dimensions are invalid or space is occupied
    */
   addWindow(options: WindowOptions = {}): this {
-    // Check if space is occupied before adding the window
     const window = new Window(this.orientation, options, this.factory);
 
-    // TODO: Add collision detection here
-    // For now, we'll just add the window
+    // Check for collisions with existing children
+    this.children.forEach((child) => {
+      if (child instanceof Window) {
+        const childPoints = child.getOccupiedPoints().map((point) => child.localToWorld(point));
+        const windowPoints = window.getOccupiedPoints().map((point) => window.localToWorld(point));
+
+        const overlap = windowPoints.some((point) =>
+          childPoints.some(
+            (childPoint) => point.x === childPoint.x && point.y === childPoint.y && point.z === childPoint.z
+          )
+        );
+
+        if (overlap) {
+          throw new Error("Cannot place window: space is occupied");
+        }
+      }
+    });
+
     this.children.push(window);
     return this;
   }
