@@ -34,8 +34,9 @@ export class Anchor extends Prefab {
   /**
    * Draws nothing as the anchor is just a container
    */
-  draw(): void {
-    this.children.forEach((child) => child.draw());
+  draw(put: PutFunc): void {
+    // Pass the `put` argument to the `draw` method of child prefabs
+    this.children.forEach((child) => child.draw(put));
   }
 
   /**
