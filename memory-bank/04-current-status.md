@@ -39,28 +39,33 @@
 
 ## Known Issues & Technical Debt
 
+### ✅ Recently Fixed
+- **Compilation Errors**: Fixed missing PutFunc import and localToWorld access modifiers
+- **Import Issues**: Cleaned up main.ts imports and removed unused dependencies
+- **API Inconsistencies**: Added missing buildAt() method to HouseBuilder
+- **Infinite Loop**: Fixed recursive system.run() call in main.ts
+
 ### Code Quality Issues 🔧
-- **Import Inconsistencies**: Some imports in main.ts reference old file paths (ColorBlockSelector)
-- **Unused Imports**: Several imports in main.ts are not actively used
-- **Method Naming**: HouseBuilder has both `build()` and `buildAt()` methods with unclear distinction
+- **Method Signatures**: HouseBuilder build() vs buildAt() could be better unified
+- **Error Handling**: Limited error handling throughout the system
+- **Code Documentation**: Missing JSDoc comments on several public methods
 
 ### Missing Implementations 🚧
-- **Error Handling**: Limited error handling throughout the system
 - **Configuration**: No external configuration system for house parameters
 - **Persistence**: No saving/loading of house designs
 - **Advanced Prefabs**: Limited prefab variety (missing stairs, roofs, complex structures)
 
-### Testing Gaps 🧪
-- **Integration Tests**: Limited full end-to-end testing
+### Testing Issues 🧪
+- **Window Tests**: 4 failing tests related to rotation and collision detection
 - **Edge Cases**: Minimal testing of boundary conditions and error states
 - **Performance Tests**: No load testing for large structures
 
 ## Immediate Development Priorities
 
 ### High Priority 🔥
-1. **Fix Import Issues**: Resolve ColorBlockSelector import and clean up main.ts
-2. **Complete HouseBuilder API**: Clarify build vs buildAt method responsibilities
-3. **Add Error Handling**: Implement proper error handling throughout system
+1. **Fix Window Test Failures**: Address rotation, collision detection, and dimension issues
+2. **Improve Error Handling**: Implement proper error handling throughout system
+3. **Code Quality**: Add proper JSDoc documentation and type safety improvements
 
 ### Medium Priority 📋
 1. **Expand Prefab Library**: Add roof, stairs, foundation prefabs

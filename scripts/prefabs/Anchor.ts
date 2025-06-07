@@ -5,6 +5,7 @@ import { Door } from "./Door";
 import { Window } from "./Window";
 import { WindowOptions } from "../types/WindowOptions";
 import { PrefabFactory, defaultPrefabFactory } from "./PrefabFactory";
+import { PutFunc } from "./PutFunc";
 
 /**
  * Represents an anchor point in the building system

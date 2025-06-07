@@ -21,6 +21,11 @@ export class HouseBuilder {
     this.anchor.build(this.orientation, this.putBuffer);
   }
 
+  buildAt(anchorPoint: Point) {
+    const buildOrientation = new Orientation(anchorPoint, this.orientation.rotation);
+    this.anchor.build(buildOrientation, this.putBuffer);
+  }
+
   private putBuffer(orientation: Orientation, position: Point, blockType: BlockType) {
     this.blockBuffer.putOffset(position, orientation, blockType);
   }

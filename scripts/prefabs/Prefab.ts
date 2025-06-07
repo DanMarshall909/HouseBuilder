@@ -89,7 +89,7 @@ export abstract class Prefab implements IPrefab {
    * @param localPoint - The point in local coordinates
    * @returns A new Point in world coordinates
    */
-  protected localToWorld(localPoint: Point): Point {
+  public localToWorld(localPoint: Point): Point {
     if (!localPoint) {
       throw new Error("Local point cannot be null or undefined");
     }
