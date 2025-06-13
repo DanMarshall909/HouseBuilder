@@ -1,19 +1,20 @@
-import { IBlockIO } from "../../BlockBuffer";
+import { IBlockIO } from "../../io/IBlockIO";
 import { BlockType } from "../../types/Blocks";
-import Point from "../Point"; 
-import {Block} from "../../types/Block";
+import { Point } from "../Point";
+import { Block } from "../../types/Block";
 
 let previousPoints: Point[] = []; // Store the points of the previous frame to clear them
 
 /**
  * Draws a hollow sphere with a surface thickness of 1 block.
+ * @param blockIO - The IBlockIO instance to use for block placement.
  * @param center - The center point of the sphere.
  * @param radius - The radius of the sphere.
  * @param tick - The current tick for animation purposes.
  * @param formula - The formula function used to select colors.
  */
 export function drawSphere(
-  BlockBuffer: IBlockBuffer,
+  blockIO: IBlockIO,
   center: Point,
   radius: number,
   tick: number,
@@ -25,7 +26,7 @@ export function drawSphere(
 
   // Clear the blocks from the previous frame
   for (const point of previousPoints) {
-    BlockBuffer.put(point, new Block(BlockType.Air));
+    blockIO.put(point, new Block(BlockType.Air));
   }
 
   // Iterate over a cubic region that bounds the sphere
@@ -40,7 +41,7 @@ export function drawSphere(
           const point = new Point(center.x + x, center.y + y, center.z + z);
 
           const block = formula(point, tick);
-          BlockBuffer.put(point, block);
+          blockIO.put(point, block);
 
           // Store the point for clearing in the next frame
           currentPoints.push(point);

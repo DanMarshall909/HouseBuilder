@@ -359,3 +359,4 @@ MigrationBackup/
 
 # testing
 /coverage
+behavior_packs/HouseBuilder/
