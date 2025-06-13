@@ -134,3 +134,18 @@ export class TurtleBuilder {
     return new Point(x, y, z);
   }
 }
+
+// Extensibility: Command registration system
+export type TurtleCommand = (tb: TurtleBuilder, ...args: any[]) => TurtleBuilder;
+const commandRegistry: Record<string, TurtleCommand> = {};
+
+export function registerTurtleCommand(name: string, fn: TurtleCommand) {
+  commandRegistry[name] = fn;
+  (TurtleBuilder.prototype as any)[name] = function (...args: any[]) {
+    return commandRegistry[name](this, ...args);
+  };
+}
+
+// Example: register a custom command in another file
+// registerTurtleCommand('circle', (tb, radius, block) => { ... });
+// tb.circle(5, BlockType.Glass);
