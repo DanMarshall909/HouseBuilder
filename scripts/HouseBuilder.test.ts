@@ -62,9 +62,9 @@ describe("HouseBuilder", () => {
     expect(blockBuffer.get(new Point(4, 2, 3))?.block).toBe(BlockType.StoneBricks);
 
     // Second wall (along Z axis, starting from end of first wall)
-    expect(blockBuffer.get(new Point(3, 2, 2))?.block).toBe(BlockType.StoneBricks);
-    expect(blockBuffer.get(new Point(3, 2, 3))?.block).toBe(BlockType.StoneBricks);
-    expect(blockBuffer.get(new Point(3, 2, 4))?.block).toBe(BlockType.StoneBricks);
+    expect(blockBuffer.get(new Point(3, 2, 5))?.block).toBe(BlockType.StoneBricks);
+    expect(blockBuffer.get(new Point(3, 2, 6))?.block).toBe(BlockType.StoneBricks);
+    expect(blockBuffer.get(new Point(3, 2, 7))?.block).toBe(BlockType.StoneBricks);
 
     // Add a test to verify no unexpected blocks are placed
     expect(blockBuffer.get(new Point(1, 2, 4))).toBeUndefined();
@@ -94,18 +94,18 @@ describe("HouseBuilder", () => {
     expect(blockBuffer.get(new Point(4, 2, 3))?.block).toBe(BlockType.StoneBricks);
 
     // Second wall (along +Z axis)
-    expect(blockBuffer.get(new Point(3, 2, 2))?.block).toBe(BlockType.StoneBricks);
-    expect(blockBuffer.get(new Point(3, 2, 3))?.block).toBe(BlockType.StoneBricks);
-    expect(blockBuffer.get(new Point(3, 2, 4))?.block).toBe(BlockType.StoneBricks);
+    expect(blockBuffer.get(new Point(3, 2, 5))?.block).toBe(BlockType.StoneBricks);
+    expect(blockBuffer.get(new Point(3, 2, 6))?.block).toBe(BlockType.StoneBricks);
+    expect(blockBuffer.get(new Point(3, 2, 7))?.block).toBe(BlockType.StoneBricks);
 
     // Third wall (along -Z axis)
-    expect(blockBuffer.get(new Point(3, 2, -2))?.block).toBe(BlockType.StoneBricks);
-    expect(blockBuffer.get(new Point(3, 2, -3))?.block).toBe(BlockType.StoneBricks);
-    expect(blockBuffer.get(new Point(3, 2, -4))?.block).toBe(BlockType.StoneBricks);
+    expect(blockBuffer.get(new Point(6, 2, -5))?.block).toBe(BlockType.StoneBricks);
+    expect(blockBuffer.get(new Point(6, 2, -6))?.block).toBe(BlockType.StoneBricks);
+    expect(blockBuffer.get(new Point(6, 2, -7))?.block).toBe(BlockType.StoneBricks);
 
     // Add a test to verify no unexpected blocks are placed
     expect(blockBuffer.get(new Point(5, 2, 3))).toBeUndefined();
-    expect(blockBuffer.get(new Point(3, 2, 5))).toBeUndefined();
-    expect(blockBuffer.get(new Point(3, 2, -5))).toBeUndefined();
+    expect(blockBuffer.get(new Point(3, 2, 8))).toBeUndefined();
+    expect(blockBuffer.get(new Point(6, 2, -8))).toBeUndefined();
   });
 });

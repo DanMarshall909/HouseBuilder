@@ -1,6 +1,6 @@
 import { Prefab } from "./Prefab";
 import { BlockType } from "../types/Blocks";
-import { Orientation, Point } from "../geometry/Point";
+import { Orientation, Point, Rotation } from "../geometry/Point";
 import { PutFunc } from "./PutFunc";
 import { PrefabFactory, defaultPrefabFactory } from "./PrefabFactory";
 import { WindowOptions, WindowDimensions } from "../types/WindowOptions";
@@ -17,6 +17,33 @@ const DEFAULT_WINDOW_OPTIONS: Required<WindowOptions> = {
 export class Window extends Prefab {
   private readonly size: WindowDimensions;
   private readonly blockType: BlockType;
+
+  protected localToWorld(point: Point): Point {
+    const { rotation, point: { x: ox, y: oy, z: oz } } = this.orientation;
+    let x = 0;
+    let z = 0;
+    switch (rotation) {
+      case 0:
+        x = ox + point.x;
+        z = oz + point.z;
+        break;
+      case 90:
+        x = ox - point.z;
+        z = oz + point.x;
+        break;
+      case 180:
+        x = ox - point.x;
+        z = oz - point.z;
+        break;
+      case 270:
+        x = ox + point.z;
+        z = oz - point.x;
+        break;
+      default:
+        throw new Error(`Invalid rotation: ${rotation}`);
+    }
+    return new Point(x, oy + point.y, z);
+  }
 
   /**
    * Creates a new window prefab
@@ -65,12 +92,12 @@ export class Window extends Prefab {
   private checkOverlap(put: PutFunc): boolean {
     try {
       this.getOccupiedPoints().forEach((point) => {
-        const worldPoint = this.localToWorld(point);
-        put(this.orientation, point, this.blockType);
+        const world = this.localToWorld(point);
+        put(new Orientation(world, 0 as Rotation), Point.Zero, this.blockType);
       });
-      return false; // No overlap detected
+      return false;
     } catch (error) {
-      return true; // Overlap detected
+      return true;
     }
   }
 
@@ -80,14 +107,13 @@ export class Window extends Prefab {
    * @throws {Error} If the window would overlap with existing blocks
    */
   draw(put: PutFunc): void {
-    // Check for overlaps before placing any blocks
     if (this.checkOverlap(put)) {
       throw new Error("Cannot place window: space is occupied");
     }
 
-    // Place glass blocks in a rectangular pattern
     this.getOccupiedPoints().forEach((point) => {
-      put(this.orientation, point, this.blockType);
+      const world = this.localToWorld(point);
+      put(new Orientation(world, 0 as Rotation), Point.Zero, this.blockType);
     });
   }
 
@@ -98,6 +124,7 @@ export class Window extends Prefab {
   getOrientationForChildPrefab(): Orientation {
     // Return orientation at the right edge of the window
     const endPoint = this.getOffsetPoint(this.size.width);
-    return new Orientation(this.localToWorld(endPoint), this.orientation.rotation);
+    const world = this.localToWorld(endPoint);
+    return new Orientation(world, this.orientation.rotation);
   }
 }
