@@ -1,5 +1,5 @@
 import { Prefab } from "./Prefab";
-import { Orientation } from "../geometry/Point";
+import { Orientation, Point } from "../geometry/Point";
 import { DoorType } from "../types/Blocks";
 import { Door } from "./Door";
 import { Window } from "./Window";
@@ -22,14 +22,6 @@ export class Anchor extends Prefab {
    */
   constructor(public readonly orientation: Orientation, factory: PrefabFactory = defaultPrefabFactory) {
     super(orientation, factory);
-  }
-
-  /**
-   * Gets the orientation for child prefabs
-   * @returns The same orientation as the anchor
-   */
-  getOrientationForChildPrefab(): Orientation {
-    return this.orientation;
   }
 
   /**
@@ -57,27 +49,53 @@ export class Anchor extends Prefab {
    * @throws {Error} If window dimensions are invalid or space is occupied
    */
   addWindow(options: WindowOptions = {}): this {
-    const window = new Window(this.orientation, options, this.factory);
+    // Get the orientation for the new window based on existing children
+    const windowOrientation = this.getOrientationForChildPrefab();
+    const window = new Window(windowOrientation, options, this.factory);
 
     // Check for collisions with existing children
-    this.children.forEach((child) => {
-      if (child instanceof Window) {
-        const childPoints = child.getOccupiedPoints().map((point) => child.localToWorld(point));
-        const windowPoints = window.getOccupiedPoints().map((point) => window.localToWorld(point));
-
-        const overlap = windowPoints.some((point) =>
-          childPoints.some(
-            (childPoint) => point.x === childPoint.x && point.y === childPoint.y && point.z === childPoint.z
+    if (this.children.length > 0) {
+      const windowWorldPoints = window.getWorldOccupiedPoints();
+      
+      // Check against all existing children that might place blocks
+      this.children.forEach((child) => {
+        let childWorldPoints: Point[] = [];
+        
+        // Get occupied points from different prefab types
+        if ('getWorldOccupiedPoints' in child && typeof child.getWorldOccupiedPoints === 'function') {
+          childWorldPoints = child.getWorldOccupiedPoints();
+        }
+        
+        const overlap = windowWorldPoints.some((windowPoint) =>
+          childWorldPoints.some(
+            (childPoint) => 
+              windowPoint.x === childPoint.x && 
+              windowPoint.y === childPoint.y && 
+              windowPoint.z === childPoint.z
           )
         );
 
         if (overlap) {
           throw new Error("Cannot place window: space is occupied");
         }
-      }
-    });
+      });
+    }
 
     this.children.push(window);
     return this;
+  }
+
+  /**
+   * Gets the orientation for the next child prefab based on existing children
+   * @returns The orientation where the next child should be placed
+   */
+  getOrientationForChildPrefab(): Orientation {
+    if (this.children.length === 0) {
+      return this.orientation;
+    }
+
+    // Get the orientation from the last child
+    const lastChild = this.children[this.children.length - 1];
+    return lastChild.getOrientationForChildPrefab();
   }
 }

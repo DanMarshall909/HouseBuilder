@@ -44,7 +44,7 @@ export class Window extends Prefab {
   }
 
   /**
-   * Gets the points that this window will occupy
+   * Gets the points that this window will occupy in local coordinates
    * @returns Array of points in local coordinates
    */
   getOccupiedPoints(): Point[] {
@@ -58,33 +58,18 @@ export class Window extends Prefab {
   }
 
   /**
-   * Checks if this window would overlap with any existing blocks
-   * @param put - Function to check block placement
-   * @returns true if there would be an overlap
+   * Gets the points that this window will occupy in world coordinates
+   * @returns Array of points in world coordinates
    */
-  private checkOverlap(put: PutFunc): boolean {
-    try {
-      this.getOccupiedPoints().forEach((point) => {
-        const worldPoint = this.localToWorld(point);
-        put(this.orientation, point, this.blockType);
-      });
-      return false; // No overlap detected
-    } catch (error) {
-      return true; // Overlap detected
-    }
+  getWorldOccupiedPoints(): Point[] {
+    return this.getOccupiedPoints().map(point => this.localToWorld(point));
   }
 
   /**
    * Draws the window by placing glass blocks in a rectangular pattern
    * @param put - Function to place blocks in the world
-   * @throws {Error} If the window would overlap with existing blocks
    */
   draw(put: PutFunc): void {
-    // Check for overlaps before placing any blocks
-    if (this.checkOverlap(put)) {
-      throw new Error("Cannot place window: space is occupied");
-    }
-
     // Place glass blocks in a rectangular pattern
     this.getOccupiedPoints().forEach((point) => {
       put(this.orientation, point, this.blockType);

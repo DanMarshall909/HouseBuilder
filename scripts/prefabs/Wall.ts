@@ -43,12 +43,33 @@ export class Wall extends Prefab {
   }
 
   /**
+   * Gets the points that this wall will occupy in local coordinates
+   * @returns Array of points in local coordinates
+   */
+  getOccupiedPoints(): Point[] {
+    const points: Point[] = [];
+    for (let i = 0; i < this.length; i++) {
+      const offset = i + 1;
+      points.push(this.getOffsetPoint(offset));
+    }
+    return points;
+  }
+
+  /**
+   * Gets the points that this wall will occupy in world coordinates
+   * @returns Array of points in world coordinates
+   */
+  getWorldOccupiedPoints(): Point[] {
+    return this.getOccupiedPoints().map(point => this.localToWorld(point));
+  }
+
+  /**
    * Gets the orientation for child prefabs at the end of the wall
-   * @returns The orientation at the end of the wall
+   * @returns The orientation after the end of the wall
    */
   getOrientationForChildPrefab(): Orientation {
-    // Calculate the end point of the wall in its local coordinate system
-    const endPoint = this.getOffsetPoint(this.length);
+    // Calculate the point after the end of the wall
+    const endPoint = this.getOffsetPoint(this.length + 1);
 
     // Convert to world coordinates and create new orientation
     return new Orientation(this.localToWorld(endPoint), this.orientation.rotation);
