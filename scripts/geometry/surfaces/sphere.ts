@@ -1,7 +1,7 @@
-import { IBlockIO } from "../../BlockBuffer";
+import { BlockBuffer } from "../../io/BlockBuffer";
 import { BlockType } from "../../types/Blocks";
-import Point from "../Point"; 
-import {Block} from "../../types/Block";
+import { Point } from "../Point";
+import { Block } from "../../types/Block";
 
 let previousPoints: Point[] = []; // Store the points of the previous frame to clear them
 
@@ -13,7 +13,7 @@ let previousPoints: Point[] = []; // Store the points of the previous frame to c
  * @param formula - The formula function used to select colors.
  */
 export function drawSphere(
-  BlockBuffer: IBlockBuffer,
+  blockBuffer: BlockBuffer,
   center: Point,
   radius: number,
   tick: number,
@@ -25,7 +25,7 @@ export function drawSphere(
 
   // Clear the blocks from the previous frame
   for (const point of previousPoints) {
-    BlockBuffer.put(point, new Block(BlockType.Air));
+    blockBuffer.put(point, BlockType.Air);
   }
 
   // Iterate over a cubic region that bounds the sphere
@@ -40,7 +40,7 @@ export function drawSphere(
           const point = new Point(center.x + x, center.y + y, center.z + z);
 
           const block = formula(point, tick);
-          BlockBuffer.put(point, block);
+          blockBuffer.put(point, block.block);
 
           // Store the point for clearing in the next frame
           currentPoints.push(point);

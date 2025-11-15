@@ -1,0 +1,38 @@
+{
+  "name": "Simple Cottage",
+  "description": "A small single-room cottage with a gabled roof",
+  "rooms": [
+    {
+      "position": { "x": 0, "y": 64, "z": 0 },
+      "rotation": 0,
+      "width": 8,
+      "depth": 6,
+      "height": 4,
+      "floor": {
+        "material": "OakPlanks",
+        "yOffset": 0
+      },
+      "walls": [
+        { "side": "front", "material": "StoneBricks" },
+        { "side": "back", "material": "StoneBricks" },
+        { "side": "left", "material": "StoneBricks" },
+        { "side": "right", "material": "StoneBricks" }
+      ],
+      "windows": [
+        { "side": "front", "offsetAlong": 2, "offsetHeight": 2, "width": 2, "height": 2 },
+        { "side": "back", "offsetAlong": 2, "offsetHeight": 2, "width": 2, "height": 2 },
+        { "side": "left", "offsetAlong": 1, "offsetHeight": 2, "width": 2, "height": 2 }
+      ],
+      "doors": [
+        { "side": "front", "offsetAlong": 6, "material": "OakDoor" }
+      ],
+      "ceiling": {
+        "material": "OakPlanks"
+      },
+      "roof": {
+        "material": "BrickBlock",
+        "style": "gabled"
+      }
+    }
+  ]
+}
