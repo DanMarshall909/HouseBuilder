@@ -1,0 +1,98 @@
+{
+  "name": "Grand Mansion",
+  "description": "A luxurious three-story mansion with multiple rooms and a pyramidal roof",
+  "rooms": [
+    {
+      "position": { "x": 0, "y": 64, "z": 0 },
+      "rotation": 0,
+      "width": 16,
+      "depth": 12,
+      "height": 5,
+      "floor": {
+        "material": "PolishedAndesite",
+        "yOffset": 0
+      },
+      "walls": [
+        { "side": "front", "material": "QuartzBlock" },
+        { "side": "back", "material": "QuartzBlock" },
+        { "side": "left", "material": "QuartzBlock" },
+        { "side": "right", "material": "QuartzBlock" }
+      ],
+      "windows": [
+        { "side": "front", "offsetAlong": 2, "offsetHeight": 2, "width": 3, "height": 3 },
+        { "side": "front", "offsetAlong": 10, "offsetHeight": 2, "width": 3, "height": 3 },
+        { "side": "back", "offsetAlong": 2, "offsetHeight": 2, "width": 3, "height": 3 },
+        { "side": "back", "offsetAlong": 10, "offsetHeight": 2, "width": 3, "height": 3 },
+        { "side": "left", "offsetAlong": 4, "offsetHeight": 2, "width": 3, "height": 3 },
+        { "side": "right", "offsetAlong": 4, "offsetHeight": 2, "width": 3, "height": 3 }
+      ],
+      "doors": [
+        { "side": "front", "offsetAlong": 7, "material": "DarkOakDoor" }
+      ],
+      "stairs": [
+        { "corner": "backRight", "material": "QuartzStairs", "steps": 5, "width": 3 }
+      ],
+      "ceiling": {
+        "material": "PolishedAndesite"
+      }
+    },
+    {
+      "position": { "x": 0, "y": 69, "z": 0 },
+      "rotation": 0,
+      "width": 16,
+      "depth": 12,
+      "height": 5,
+      "floor": {
+        "material": "DarkOakPlanks",
+        "yOffset": 0
+      },
+      "walls": [
+        { "side": "front", "material": "QuartzBlock" },
+        { "side": "back", "material": "QuartzBlock" },
+        { "side": "left", "material": "QuartzBlock" },
+        { "side": "right", "material": "QuartzBlock" }
+      ],
+      "windows": [
+        { "side": "front", "offsetAlong": 3, "offsetHeight": 2, "width": 2, "height": 3 },
+        { "side": "front", "offsetAlong": 10, "offsetHeight": 2, "width": 2, "height": 3 },
+        { "side": "back", "offsetAlong": 3, "offsetHeight": 2, "width": 2, "height": 3 },
+        { "side": "left", "offsetAlong": 4, "offsetHeight": 2, "width": 2, "height": 3 },
+        { "side": "right", "offsetAlong": 4, "offsetHeight": 2, "width": 2, "height": 3 }
+      ],
+      "stairs": [
+        { "corner": "backRight", "material": "QuartzStairs", "steps": 5, "width": 3 }
+      ],
+      "ceiling": {
+        "material": "DarkOakPlanks"
+      }
+    },
+    {
+      "position": { "x": 0, "y": 74, "z": 0 },
+      "rotation": 0,
+      "width": 16,
+      "depth": 12,
+      "height": 4,
+      "floor": {
+        "material": "DarkOakPlanks",
+        "yOffset": 0
+      },
+      "walls": [
+        { "side": "front", "material": "QuartzBlock" },
+        { "side": "back", "material": "QuartzBlock" },
+        { "side": "left", "material": "QuartzBlock" },
+        { "side": "right", "material": "QuartzBlock" }
+      ],
+      "windows": [
+        { "side": "front", "offsetAlong": 6, "offsetHeight": 2, "width": 4, "height": 2 },
+        { "side": "back", "offsetAlong": 6, "offsetHeight": 2, "width": 4, "height": 2 }
+      ],
+      "ceiling": {
+        "material": "DarkOakPlanks"
+      },
+      "roof": {
+        "material": "RedNetherBrick",
+        "style": "pyramidal"
+      }
+    }
+  ]
+}

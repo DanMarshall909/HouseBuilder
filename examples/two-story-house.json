@@ -1,0 +1,66 @@
+{
+  "name": "Two-Story House",
+  "description": "A modern two-story house with stairs connecting the levels",
+  "rooms": [
+    {
+      "position": { "x": 0, "y": 64, "z": 0 },
+      "rotation": 0,
+      "width": 10,
+      "depth": 8,
+      "height": 4,
+      "floor": {
+        "material": "OakPlanks",
+        "yOffset": 0
+      },
+      "walls": [
+        { "side": "front", "material": "Planks" },
+        { "side": "back", "material": "Planks" },
+        { "side": "left", "material": "Planks" },
+        { "side": "right", "material": "Planks" }
+      ],
+      "windows": [
+        { "side": "front", "offsetAlong": 1, "offsetHeight": 2, "width": 2, "height": 2 },
+        { "side": "front", "offsetAlong": 6, "offsetHeight": 2, "width": 2, "height": 2 },
+        { "side": "right", "offsetAlong": 2, "offsetHeight": 2, "width": 2, "height": 2 }
+      ],
+      "doors": [
+        { "side": "front", "offsetAlong": 4, "material": "SpruceDoor" }
+      ],
+      "stairs": [
+        { "corner": "backLeft", "material": "OakStairs", "steps": 4, "width": 2 }
+      ],
+      "ceiling": {
+        "material": "OakPlanks"
+      }
+    },
+    {
+      "position": { "x": 0, "y": 68, "z": 0 },
+      "rotation": 0,
+      "width": 10,
+      "depth": 8,
+      "height": 4,
+      "floor": {
+        "material": "SprucePlanks",
+        "yOffset": 0
+      },
+      "walls": [
+        { "side": "front", "material": "Planks" },
+        { "side": "back", "material": "Planks" },
+        { "side": "left", "material": "Planks" },
+        { "side": "right", "material": "Planks" }
+      ],
+      "windows": [
+        { "side": "front", "offsetAlong": 2, "offsetHeight": 2, "width": 3, "height": 2 },
+        { "side": "back", "offsetAlong": 2, "offsetHeight": 2, "width": 3, "height": 2 },
+        { "side": "left", "offsetAlong": 2, "offsetHeight": 2, "width": 2, "height": 2 }
+      ],
+      "ceiling": {
+        "material": "SprucePlanks"
+      },
+      "roof": {
+        "material": "BrickBlock",
+        "style": "hipped"
+      }
+    }
+  ]
+}
