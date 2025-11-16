@@ -1,0 +1,70 @@
+{
+  "name": "Cozy Cottage",
+  "description": "A small cottage with bedroom, kitchen, and living area",
+  "rooms": [
+    {
+      "name": "Living Room",
+      "position": { "x": 0, "y": 0, "z": 0 },
+      "rotation": 0,
+      "width": 8,
+      "depth": 8,
+      "height": 5,
+      "floor": { "material": "OakPlanks" },
+      "ceiling": { "material": "OakPlanks" },
+      "walls": [
+        { "side": "front", "material": "StoneBricks" },
+        { "side": "back", "material": "StoneBricks" },
+        { "side": "left", "material": "StoneBricks" },
+        { "side": "right", "material": "StoneBricks" }
+      ],
+      "windows": [
+        { "side": "front", "offsetAlong": 2, "offsetHeight": 2, "width": 2, "height": 2, "material": "Glass" },
+        { "side": "left", "offsetAlong": 3, "offsetHeight": 2, "width": 2, "height": 2, "material": "Glass" }
+      ],
+      "doors": [
+        { "side": "front", "offsetAlong": 5, "material": "OakDoor" }
+      ],
+      "objects": [
+        { "type": "CraftingTable", "position": { "x": 2, "y": 1, "z": 2 }, "description": "crafting table" },
+        { "type": "Chest", "position": { "x": 6, "y": 1, "z": 2 }, "description": "storage chest" },
+        { "type": "Torch", "position": { "x": 4, "y": 3, "z": 4 }, "description": "ceiling light" }
+      ],
+      "roof": { "material": "OakPlanks", "style": "flat" }
+    },
+    {
+      "name": "Bedroom",
+      "position": { "x": 8, "y": 0, "z": 0 },
+      "rotation": 0,
+      "width": 6,
+      "depth": 8,
+      "height": 5,
+      "floor": { "material": "OakPlanks" },
+      "ceiling": { "material": "OakPlanks" },
+      "walls": [
+        { "side": "front", "material": "StoneBricks" },
+        { "side": "back", "material": "StoneBricks" },
+        { "side": "right", "material": "StoneBricks" }
+      ],
+      "windows": [
+        { "side": "front", "offsetAlong": 2, "offsetHeight": 2, "width": 2, "height": 2, "material": "Glass" }
+      ],
+      "doors": [
+        { "side": "left", "offsetAlong": 3, "material": "BirchDoor" }
+      ],
+      "objects": [
+        { "type": "Bed", "position": { "x": 2, "y": 1, "z": 2 }, "description": "bed" },
+        { "type": "Chest", "position": { "x": 4, "y": 1, "z": 2 }, "description": "storage" },
+        { "type": "Lantern", "position": { "x": 3, "y": 3, "z": 4 }, "description": "light" }
+      ],
+      "roof": { "material": "OakPlanks", "style": "flat" }
+    }
+  ],
+  "connections": [
+    {
+      "fromRoomIndex": 0,
+      "toRoomIndex": 1,
+      "doorMaterial": "OakDoor",
+      "description": "Connect living room to bedroom"
+    }
+  ]
+}

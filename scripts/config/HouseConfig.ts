@@ -83,6 +83,26 @@ export interface RoofConfig {
 }
 
 /**
+ * Object placement configuration
+ */
+export interface ObjectConfig {
+  type: string; // Block type to place
+  position: Position;
+  rotation?: ConfigRotation;
+  description?: string; // What this object represents (e.g., "bed", "table", "chest")
+}
+
+/**
+ * Room connection via door (connects two rooms)
+ */
+export interface RoomConnection {
+  fromRoomIndex: number;
+  toRoomIndex: number;
+  doorMaterial?: string;
+  description?: string;
+}
+
+/**
  * Room configuration in JSON
  */
 export interface RoomConfig {
@@ -98,6 +118,8 @@ export interface RoomConfig {
   doors?: DoorConfig[];
   stairs?: StairsConfig[];
   roof?: RoofConfig;
+  objects?: ObjectConfig[]; // Objects placed in this room
+  name?: string; // Optional room name for AI context
 }
 
 /**
@@ -107,4 +129,5 @@ export interface HouseConfig {
   name: string;
   description?: string;
   rooms: RoomConfig[];
+  connections?: RoomConnection[]; // Connections between rooms
 }

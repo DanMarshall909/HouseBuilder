@@ -1,10 +1,13 @@
-import {world, system} from "@minecraft/server";
-import {MinecraftBlockRegistry} from "./implementations/MinecraftBlockRegistry";
-import {drawSphere} from "./geometry/surfaces/sphere";
-import {DynamicBlock} from "./textures/ColorBlockSelector";
-import {HouseBuilder} from "./HouseBuilder";
-import {Point, Orientation} from "./geometry/Point";
-import {BlockBuffer} from "./io/BlockBuffer";
+import { world, system } from "@minecraft/server";
+import { MinecraftBlockRegistry } from "./implementations/MinecraftBlockRegistry";
+import { drawSphere } from "./geometry/surfaces/sphere";
+import { DynamicBlock } from "./textures/ColorBlockSelector";
+import { HouseBuilder } from "./HouseBuilder";
+import { Point, Orientation } from "./geometry/Point";
+import { BlockBuffer } from "./io/BlockBuffer";
+// Import AI builder for programmatic use
+import { AIHouseBuilder } from "./ai/AIHouseBuilder";
+import { AIHouseBuilderUI } from "./ui/AIHouseBuilderUI";
 
 // Initialize the block registry for use
 MinecraftBlockRegistry.initialize();
@@ -29,3 +32,18 @@ function mainTick() {
 
 // Start the main tick function
 system.run(mainTick);
+
+// Log startup message
+console.log("HouseBuilder initialized with AI House Builder support!");
+console.log("AI House Builder can be used programmatically via the AIHouseBuilder class");
+
+// Example usage (commented out):
+// async function buildAIHouse() {
+//   const aiBuilder = new AIHouseBuilder();
+//   const prompt = "A cozy cottage with a bedroom and living room";
+//   const blockBuffer = await aiBuilder.buildFromPrompt(prompt);
+//   // Deploy blockBuffer to world
+// }
+
+// Export AI builder for use in other scripts
+export { AIHouseBuilder, AIHouseBuilderUI };
