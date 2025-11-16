@@ -5,9 +5,10 @@ import { DynamicBlock } from "./textures/ColorBlockSelector";
 import { HouseBuilder } from "./HouseBuilder";
 import { Point, Orientation } from "./geometry/Point";
 import { BlockBuffer } from "./io/BlockBuffer";
-// Import AI builder for programmatic use
+// Import AI builder and visualizer for programmatic use
 import { AIHouseBuilder } from "./ai/AIHouseBuilder";
 import { AIHouseBuilderUI } from "./ui/AIHouseBuilderUI";
+import { HouseVisualizer, VisualizationMode } from "./visualization/HouseVisualizer";
 
 // Initialize the block registry for use
 MinecraftBlockRegistry.initialize();
@@ -34,16 +35,23 @@ function mainTick() {
 system.run(mainTick);
 
 // Log startup message
-console.log("HouseBuilder initialized with AI House Builder support!");
+console.log("HouseBuilder initialized with AI House Builder and 3D Visualization support!");
 console.log("AI House Builder can be used programmatically via the AIHouseBuilder class");
+console.log("House Visualizer provides 3D previews in multiple modes");
 
 // Example usage (commented out):
-// async function buildAIHouse() {
+// async function buildAIHouseWithPreview() {
 //   const aiBuilder = new AIHouseBuilder();
 //   const prompt = "A cozy cottage with a bedroom and living room";
-//   const blockBuffer = await aiBuilder.buildFromPrompt(prompt);
-//   // Deploy blockBuffer to world
+//
+//   // Generate with preview
+//   const result = await aiBuilder.buildWithPreview(prompt, VisualizationMode.Wireframe);
+//   console.log(result.ascii); // Print ASCII preview
+//
+//   // Deploy preview and actual house to world
+//   // result.preview - BlockBuffer for visualization
+//   // result.house - BlockBuffer for actual house
 // }
 
-// Export AI builder for use in other scripts
-export { AIHouseBuilder, AIHouseBuilderUI };
+// Export AI builder and visualizer for use in other scripts
+export { AIHouseBuilder, AIHouseBuilderUI, HouseVisualizer, VisualizationMode };

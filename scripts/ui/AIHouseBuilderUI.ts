@@ -3,6 +3,7 @@ import { ActionFormData, ModalFormData } from "@minecraft/server-ui";
 import { AIHouseBuilder } from "../ai/AIHouseBuilder";
 import { BlockBuffer } from "../io/BlockBuffer";
 import { Point } from "../geometry/Point";
+import { VisualizationMode } from "../visualization/HouseVisualizer";
 
 /**
  * UI handler for the AI House Builder
@@ -55,7 +56,14 @@ export class AIHouseBuilderUI {
         "e.g., A cozy cottage with a bedroom, kitchen, and living room",
         ""
       )
-      .toggle("Include furniture and decorations", true);
+      .toggle("Include furniture and decorations", true)
+      .toggle("Show 3D preview before building", true)
+      .dropdown("Preview Style", [
+        "Wireframe",
+        "Holographic",
+        "Colored Bounds",
+        "Solid"
+      ], 0);
 
     const response = await form.show(player);
 
@@ -65,18 +73,29 @@ export class AIHouseBuilderUI {
 
     const prompt = response.formValues[0] as string;
     const includeFurniture = response.formValues[1] as boolean;
+    const showPreview = response.formValues[2] as boolean;
+    const previewStyleIndex = response.formValues[3] as number;
 
     if (!prompt || prompt.trim().length === 0) {
       player.sendMessage("§cPlease provide a house description!");
       return;
     }
 
+    // Map dropdown index to visualization mode
+    const visualizationModes = [
+      VisualizationMode.Wireframe,
+      VisualizationMode.Holographic,
+      VisualizationMode.ColoredBounds,
+      VisualizationMode.Solid
+    ];
+    const visualizationMode = visualizationModes[previewStyleIndex];
+
     // Enhance prompt if furniture is requested
     const enhancedPrompt = includeFurniture
       ? `${prompt}. Include appropriate furniture and decorations for each room.`
       : prompt;
 
-    await this.buildHouse(player, enhancedPrompt);
+    await this.buildHouse(player, enhancedPrompt, showPreview, visualizationMode);
   }
 
   /**
@@ -110,7 +129,12 @@ export class AIHouseBuilderUI {
   /**
    * Builds the house from the prompt
    */
-  private async buildHouse(player: Player, prompt: string): Promise<void> {
+  private async buildHouse(
+    player: Player,
+    prompt: string,
+    showPreview: boolean = true,
+    visualizationMode: VisualizationMode = VisualizationMode.Wireframe
+  ): Promise<void> {
     try {
       player.sendMessage("§aGenerating your house design...");
       player.sendMessage("§7This may take a few moments...");
@@ -126,12 +150,49 @@ export class AIHouseBuilderUI {
         return;
       }
 
-      player.sendMessage(`§aBuilding "${houseConfig.name}"...`);
+      player.sendMessage(`§a✓ Generated "${houseConfig.name}"`);
       if (houseConfig.description) {
         player.sendMessage(`§7${houseConfig.description}`);
       }
 
-      // Build the house
+      // Show ASCII preview in console
+      const asciiPreview = this.aiBuilder.generateASCIIPreview(houseConfig);
+      console.log("\n" + asciiPreview);
+
+      // Get bounding box info
+      const bbox = this.aiBuilder.getBoundingBox(houseConfig);
+      player.sendMessage(`§7Size: §e${bbox.dimensions.width}x${bbox.dimensions.height}x${bbox.dimensions.depth} §7blocks`);
+      player.sendMessage(`§7Rooms: §e${houseConfig.rooms.length}`);
+
+      if (houseConfig.connections && houseConfig.connections.length > 0) {
+        player.sendMessage(`§7Connections: §e${houseConfig.connections.length}`);
+      }
+
+      // Show 3D preview if requested
+      if (showPreview) {
+        player.sendMessage(`§a📐 Generating 3D preview...`);
+        const preview = this.aiBuilder.visualizeHouse(houseConfig, visualizationMode);
+
+        const playerLocation = player.location;
+        const previewAnchor = new Point(
+          Math.floor(playerLocation.x) + 20,  // Offset preview to the side
+          Math.floor(playerLocation.y),
+          Math.floor(playerLocation.z)
+        );
+
+        await this.deployBlocks(player, preview, previewAnchor);
+        player.sendMessage(`§a✓ Preview rendered at your location (offset +20 blocks X)`);
+
+        // Ask for confirmation before building
+        const confirmed = await this.showBuildConfirmation(player, houseConfig.name);
+        if (!confirmed) {
+          player.sendMessage("§7Build cancelled.");
+          return;
+        }
+      }
+
+      // Build the actual house
+      player.sendMessage(`§aBuilding "${houseConfig.name}"...`);
       const blockBuffer = await this.aiBuilder.buildFromPrompt(prompt);
 
       // Place the house at the player's location
@@ -145,18 +206,28 @@ export class AIHouseBuilderUI {
       // Deploy the blocks to the world
       await this.deployBlocks(player, blockBuffer, anchorPoint);
 
-      player.sendMessage("§aHouse built successfully!");
-      player.sendMessage(`§7Rooms: ${houseConfig.rooms.length}`);
-
-      if (houseConfig.connections && houseConfig.connections.length > 0) {
-        player.sendMessage(`§7Room connections: ${houseConfig.connections.length}`);
-      }
+      player.sendMessage("§a✓ House built successfully!");
+      player.sendMessage("§7Enjoy your new home! 🏠");
 
     } catch (error) {
       console.error("Error building house:", error);
       player.sendMessage("§cError building house: " + (error instanceof Error ? error.message : String(error)));
       player.sendMessage("§7Please try a different description or check your API key configuration.");
     }
+  }
+
+  /**
+   * Shows build confirmation dialog
+   */
+  private async showBuildConfirmation(player: Player, houseName: string): Promise<boolean> {
+    const form = new ActionFormData()
+      .title("Build Confirmation")
+      .body(`Ready to build "${houseName}"?\n\nThe house will be placed at your current location.\n\nPreview is offset +20 blocks on X axis.`)
+      .button("§aBuild House", "textures/ui/check")
+      .button("§cCancel", "textures/ui/cancel");
+
+    const response = await form.show(player);
+    return !response.canceled && response.selection === 0;
   }
 
   /**
@@ -176,19 +247,6 @@ export class AIHouseBuilderUI {
     player.sendMessage("§aBlocks deployed!");
   }
 
-  /**
-   * Shows a confirmation dialog before building
-   */
-  async showConfirmation(player: Player, houseName: string): Promise<boolean> {
-    const form = new ActionFormData()
-      .title("Confirm Build")
-      .body(`Are you ready to build "${houseName}"?\n\nThis will place blocks at your current location.`)
-      .button("Build Now", "textures/ui/check")
-      .button("Cancel", "textures/ui/cancel");
-
-    const response = await form.show(player);
-    return !response.canceled && response.selection === 0;
-  }
 }
 
 /**

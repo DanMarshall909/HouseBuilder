@@ -9,6 +9,8 @@ Build amazing Minecraft houses using natural language with the power of AI and L
 - 🚪 **Room Connections**: Automatically connects rooms with doors
 - 🪑 **Object Placement**: Places furniture and decorations in rooms
 - 🎨 **Smart Design**: AI understands architectural concepts and room purposes
+- 📐 **3D Visualization**: Preview houses before building with multiple visualization modes (see [VISUALIZATION.md](VISUALIZATION.md))
+- 📊 **ASCII Art Previews**: Console-friendly house summaries
 
 ## Setup
 

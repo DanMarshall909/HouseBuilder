@@ -3,6 +3,7 @@ import { z } from "zod";
 import { HouseConfig, RoomConfig, ObjectConfig, RoomConnection } from "../config/HouseConfig";
 import { JsonHouseBuilder } from "../config/JsonHouseBuilder";
 import { BlockBuffer } from "../io/BlockBuffer";
+import { HouseVisualizer, VisualizationMode, VisualizerOptions } from "../visualization/HouseVisualizer";
 
 /**
  * AI-powered house builder that generates houses from natural language prompts
@@ -199,5 +200,70 @@ Respond with ONLY the JSON, no explanations or markdown.`;
       valid: errors.length === 0,
       errors
     };
+  }
+
+  /**
+   * Generates a 3D visualization preview of a house config
+   * @param config - House configuration to visualize
+   * @param mode - Visualization mode (wireframe, holographic, etc.)
+   * @returns BlockBuffer containing the visualization
+   */
+  visualizeHouse(config: HouseConfig, mode: VisualizationMode = VisualizationMode.Wireframe): BlockBuffer {
+    const visualizer = new HouseVisualizer();
+    const options: VisualizerOptions = {
+      mode,
+      showRoomLabels: true,
+      showDimensions: true,
+      highlightConnections: true
+    };
+    return visualizer.visualize(config, options);
+  }
+
+  /**
+   * Generates an ASCII visualization for console output
+   * @param config - House configuration
+   * @returns ASCII art representation
+   */
+  generateASCIIPreview(config: HouseConfig): string {
+    const visualizer = new HouseVisualizer();
+    return visualizer.generateASCIIVisualization(config);
+  }
+
+  /**
+   * Gets bounding box information for a house
+   * @param config - House configuration
+   * @returns Bounding box with min, max, and dimensions
+   */
+  getBoundingBox(config: HouseConfig): {
+    min: { x: number; y: number; z: number };
+    max: { x: number; y: number; z: number };
+    dimensions: { width: number; height: number; depth: number };
+  } {
+    const visualizer = new HouseVisualizer();
+    return visualizer.calculateBoundingBox(config);
+  }
+
+  /**
+   * Generates house with preview
+   * @param prompt - User's description
+   * @param visualizationMode - How to visualize the preview
+   * @returns Object with both config and visualization buffer
+   */
+  async buildWithPreview(
+    prompt: string,
+    visualizationMode: VisualizationMode = VisualizationMode.Wireframe
+  ): Promise<{
+    config: HouseConfig;
+    house: BlockBuffer;
+    preview: BlockBuffer;
+    ascii: string;
+  }> {
+    const config = await this.generateHouseConfig(prompt);
+    const builder = new JsonHouseBuilder();
+    const house = builder.build(config);
+    const preview = this.visualizeHouse(config, visualizationMode);
+    const ascii = this.generateASCIIPreview(config);
+
+    return { config, house, preview, ascii };
   }
 }
