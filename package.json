@@ -26,9 +26,13 @@
     "enablemcpreviewloopback": "CheckNetIsolation.exe LoopbackExempt -a -p=S-1-15-2-424268864-5579737-879501358-346833251-474568803-887069379-4040235476"
   },
   "dependencies": {
+    "@langchain/core": "^1.0.5",
+    "@langchain/openai": "^1.1.1",
     "@minecraft/math": "^1.4.0",
     "@minecraft/server": "^1.13.0",
     "@minecraft/server-ui": "^1.2.0",
-    "@minecraft/vanilla-data": "^1.21.20"
+    "@minecraft/vanilla-data": "^1.21.20",
+    "langchain": "^1.0.4",
+    "zod": "^4.1.12"
   }
 }

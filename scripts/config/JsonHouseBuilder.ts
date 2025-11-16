@@ -1,4 +1,4 @@
-import { HouseConfig, RoomConfig, WindowConfig, DoorConfig, WallConfig, StairsConfig } from "./HouseConfig";
+import { HouseConfig, RoomConfig, WindowConfig, DoorConfig, WallConfig, StairsConfig, ObjectConfig } from "./HouseConfig";
 import { BlockType, DoorType } from "../types/Blocks";
 import { Orientation, Point, Rotation } from "../geometry/Point";
 import { BlockBuffer } from "../io/BlockBuffer";
@@ -99,6 +99,13 @@ export class JsonHouseBuilder {
       room.addRoof(roofMaterial, roofStyle);
     }
 
+    // Add objects if specified
+    if (roomConfig.objects) {
+      for (const obj of roomConfig.objects) {
+        this.placeObject(obj);
+      }
+    }
+
     // Build the room into the block buffer
     room.build(orientation, (putOrientation, point, blockType) => {
       this.blockBuffer.putOffset(point, putOrientation, blockType);
@@ -185,6 +192,22 @@ export class JsonHouseBuilder {
       throw new Error(`Unknown door type: ${doorTypeName}`);
     }
     return doorType as DoorType;
+  }
+
+  /**
+   * Places an object in the scene
+   */
+  private placeObject(objectConfig: ObjectConfig): void {
+    const blockType = this.parseBlockType(objectConfig.type);
+    const position = new Point(
+      objectConfig.position.x,
+      objectConfig.position.y,
+      objectConfig.position.z
+    );
+    const rotation = objectConfig.rotation || 0;
+    const orientation = new Orientation(position, rotation as Rotation);
+
+    this.blockBuffer.putOffset(position, orientation, blockType);
   }
 
   /**
