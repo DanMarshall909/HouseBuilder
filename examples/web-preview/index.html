@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HouseBuilder Web Preview</title>
+    <link rel="stylesheet" href="./styles.css" />
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "/node_modules/three/build/three.module.js"
+        }
+      }
+    </script>
+  </head>
+  <body>
+    <main class="app">
+      <section class="panel">
+        <h1>HouseBuilder Web Preview</h1>
+        <p>Load an example JSON config and inspect it as a 3D room layout.</p>
+
+        <label for="exampleSelect">Example</label>
+        <select id="exampleSelect">
+          <option value="../simple-house.json">Simple House</option>
+          <option value="../two-story-house.json">Two Story House</option>
+          <option value="../mansion.json">Mansion</option>
+          <option value="../ai-house-example.json">AI House Example</option>
+        </select>
+
+        <div class="button-row">
+          <button id="loadButton" type="button">Load Preview</button>
+          <button id="resetCameraButton" type="button">Reset Camera</button>
+        </div>
+
+        <p id="status" class="status">Ready.</p>
+        <p class="hint">Controls: Left drag rotate, right drag pan, wheel zoom.</p>
+      </section>
+
+      <section class="viewer-wrap">
+        <div id="viewer"></div>
+      </section>
+    </main>
+
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>

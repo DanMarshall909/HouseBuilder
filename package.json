@@ -33,6 +33,7 @@
     "@minecraft/server-ui": "^1.2.0",
     "@minecraft/vanilla-data": "^1.21.20",
     "langchain": "^1.0.4",
+    "three": "^0.183.2",
     "zod": "^4.1.12"
   }
 }

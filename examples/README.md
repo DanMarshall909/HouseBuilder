@@ -175,6 +175,24 @@ const blockBuffer = JsonHouseBuilder.fromConfig(config);
 blockBuffer.render(minecraftBlockIO);
 ```
 
+## Web 3D Preview
+
+A browser-based preview is available at `examples/web-preview/` using Three.js.
+
+To run it, serve the repo over HTTP (file:// will block JSON fetches):
+
+```bash
+python -m http.server 4173
+```
+
+Then open:
+
+```text
+http://localhost:4173/examples/web-preview/
+```
+
+The viewer can load any of the sample JSON files and render room bounds in 3D.
+
 ## Tips for Creating Configurations
 
 1. **Start Simple**: Begin with a single room and gradually add features
