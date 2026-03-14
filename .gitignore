@@ -359,3 +359,6 @@ MigrationBackup/
 
 # testing
 /coverage
+
+# local environment variables
+.env
