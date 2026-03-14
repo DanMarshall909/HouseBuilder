@@ -1,61 +1,76 @@
-// MinecraftAdapter.ts
-
 import { MinecraftBlockTypes } from "@minecraft/vanilla-data";
-import { BlockType } from "../types/Blocks"; 
-import {Block} from "../types/Block";
-/**
- * Registry to maintain the mapping between Blocks enum and MinecraftBlockTypes.
- */
-export class MinecraftBlockRegistry {
-  private static blockMap: Map<BlockType, keyof typeof MinecraftBlockTypes> = new Map();
+import { BlockType } from "../types/Blocks";
+import { Block } from "../types/Block";
+import { IBlockRegistry } from "../core/registry/IBlockRegistry";
 
-  /**
-   * Initializes the mapping between Blocks enum and MinecraftBlockTypes at runtime.
-   */
+/**
+ * Minecraft Bedrock implementation of IBlockRegistry.
+ *
+ * Maps the platform-agnostic BlockType enum to @minecraft/vanilla-data string keys
+ * and back.  This is the only file that references @minecraft/vanilla-data; all
+ * core and AI code depends only on IBlockRegistry.
+ */
+export class MinecraftBlockRegistry implements IBlockRegistry {
+  private static readonly blockMap: Map<BlockType, keyof typeof MinecraftBlockTypes> = new Map();
+  private static initialised = false;
+
+  /** Populate the bidirectional mapping once on first use. */
   public static initialize(): void {
+    if (MinecraftBlockRegistry.initialised) return;
+
     Object.keys(BlockType).forEach((key) => {
       const minecraftType = MinecraftBlockTypes[key as keyof typeof MinecraftBlockTypes];
       if (minecraftType) {
-        this.blockMap.set(BlockType[key as keyof typeof BlockType], key as keyof typeof MinecraftBlockTypes);
+        MinecraftBlockRegistry.blockMap.set(
+          BlockType[key as keyof typeof BlockType],
+          key as keyof typeof MinecraftBlockTypes
+        );
       } else {
         console.warn(`MinecraftBlockTypes does not contain a type for: ${key}`);
       }
     });
+
+    MinecraftBlockRegistry.initialised = true;
   }
 
-  /**
-   * Retrieves the corresponding MinecraftBlockTypes key for a given Block.
-   * @param blockType - The custom Block type.
-   * @returns The corresponding MinecraftBlockTypes key or undefined.
-   */
+  // -------------------------------------------------------------------------
+  // IBlockRegistry
+  // -------------------------------------------------------------------------
+
+  getBlockId(blockType: BlockType): string | undefined {
+    return MinecraftBlockRegistry.blockMap.get(blockType);
+  }
+
+  getBlockType(blockId: string): BlockType | undefined {
+    for (const [block, mcId] of MinecraftBlockRegistry.blockMap.entries()) {
+      if (mcId === blockId) return block;
+    }
+    return undefined;
+  }
+
+  // -------------------------------------------------------------------------
+  // Static helpers (kept for backwards compatibility with MinecraftBlockIO)
+  // -------------------------------------------------------------------------
+
   public static getMinecraftBlockId(blockType: BlockType): keyof typeof MinecraftBlockTypes | undefined {
-    return this.blockMap.get(blockType);
+    return MinecraftBlockRegistry.blockMap.get(blockType);
   }
 
-  /**
-   * Retrieves the custom Block type for a given MinecraftBlockTypes key.
-   * @param minecraftBlockId - The MinecraftBlockTypes key.
-   * @returns The corresponding custom Block type or undefined.
-   */
   public static get(blockId: keyof typeof MinecraftBlockTypes): BlockType | undefined {
-    for (const [block, mcId] of this.blockMap.entries()) {
-      if (mcId === blockId) {
-        return block;
-      }
+    for (const [block, mcId] of MinecraftBlockRegistry.blockMap.entries()) {
+      if (mcId === blockId) return block;
     }
     return undefined;
   }
 }
 
 /**
- * Retrieves the MinecraftBlockTypes ID for a given custom Block type.
- * @param blockType - The custom Block type.
- * @returns The corresponding MinecraftBlockTypes ID or undefined if not found.
+ * Retrieves the MinecraftBlockTypes ID for a given custom Block instance.
  */
 export function getBlockId(blockType: Block): keyof typeof MinecraftBlockTypes | undefined {
   const blockEnum = BlockType[blockType.block as keyof typeof BlockType];
   return MinecraftBlockRegistry.getMinecraftBlockId(blockEnum);
 }
 
-// Initialize the registry mappings when the module is loaded
+// Initialise on module load so imports get a ready registry immediately.
 MinecraftBlockRegistry.initialize();

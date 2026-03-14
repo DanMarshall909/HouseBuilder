@@ -1,24 +1,24 @@
 import { Player } from "@minecraft/server";
 import { ActionFormData, ModalFormData } from "@minecraft/server-ui";
-import { AIHouseBuilder } from "../ai/AIHouseBuilder";
+import { IAIHouseBuilder } from "../core/ai/IAIHouseBuilder";
 import { BlockBuffer } from "../io/BlockBuffer";
 import { Point } from "../geometry/Point";
 import { VisualizationMode } from "../visualization/HouseVisualizer";
 
 /**
- * UI handler for the AI House Builder
- * Provides in-game forms for users to input prompts and build houses
+ * Minecraft UI handler for the AI House Builder.
+ *
+ * This class depends on IAIHouseBuilder, not on any concrete AI implementation.
+ * The actual builder (e.g. one backed by LangChain) is injected at construction
+ * time via main.ts, so this file has no dependency on LangChain or OpenAI.
  */
 export class AIHouseBuilderUI {
-  private aiBuilder: AIHouseBuilder;
+  private readonly aiBuilder: IAIHouseBuilder;
 
-  constructor(apiKey?: string) {
-    this.aiBuilder = new AIHouseBuilder(apiKey);
+  constructor(aiBuilder: IAIHouseBuilder) {
+    this.aiBuilder = aiBuilder;
   }
 
-  /**
-   * Shows the main menu to the player
-   */
   async showMainMenu(player: Player): Promise<void> {
     const form = new ActionFormData()
       .title("AI House Builder")
@@ -34,20 +34,15 @@ export class AIHouseBuilderUI {
     }
 
     switch (response.selection) {
-      case 0: // Create New House
+      case 0:
         await this.showPromptInput(player);
         break;
-      case 1: // Example Prompts
+      case 1:
         await this.showExamples(player);
-        break;
-      case 2: // Cancel
         break;
     }
   }
 
-  /**
-   * Shows the prompt input form
-   */
   async showPromptInput(player: Player): Promise<void> {
     const form = new ModalFormData()
       .title("Describe Your House")
@@ -62,7 +57,7 @@ export class AIHouseBuilderUI {
         "Wireframe",
         "Holographic",
         "Colored Bounds",
-        "Solid"
+        "Solid",
       ], 0);
 
     const response = await form.show(player);
@@ -81,16 +76,14 @@ export class AIHouseBuilderUI {
       return;
     }
 
-    // Map dropdown index to visualization mode
     const visualizationModes = [
       VisualizationMode.Wireframe,
       VisualizationMode.Holographic,
       VisualizationMode.ColoredBounds,
-      VisualizationMode.Solid
+      VisualizationMode.Solid,
     ];
     const visualizationMode = visualizationModes[previewStyleIndex];
 
-    // Enhance prompt if furniture is requested
     const enhancedPrompt = includeFurniture
       ? `${prompt}. Include appropriate furniture and decorations for each room.`
       : prompt;
@@ -98,18 +91,17 @@ export class AIHouseBuilderUI {
     await this.buildHouse(player, enhancedPrompt, showPreview, visualizationMode);
   }
 
-  /**
-   * Shows example prompts to inspire the user
-   */
   async showExamples(player: Player): Promise<void> {
     const form = new ActionFormData()
       .title("Example Prompts")
-      .body("Here are some example prompts to inspire you:\n\n" +
+      .body(
+        "Here are some example prompts to inspire you:\n\n" +
         "• A medieval castle with a throne room, armory, and tower\n" +
         "• A modern house with 3 bedrooms, kitchen, and living room\n" +
         "• A cozy cottage with a fireplace and garden shed\n" +
         "• A wizard's tower with a library and potion room\n" +
-        "• A beach house with large windows and an open floor plan")
+        "• A beach house with large windows and an open floor plan"
+      )
       .button("Use Example", "textures/items/book_writable")
       .button("Back to Menu", "textures/ui/back_button_default");
 
@@ -126,9 +118,6 @@ export class AIHouseBuilderUI {
     }
   }
 
-  /**
-   * Builds the house from the prompt
-   */
   private async buildHouse(
     player: Player,
     prompt: string,
@@ -139,10 +128,8 @@ export class AIHouseBuilderUI {
       player.sendMessage("§aGenerating your house design...");
       player.sendMessage("§7This may take a few moments...");
 
-      // Generate the house configuration
       const houseConfig = await this.aiBuilder.generateHouseConfig(prompt);
 
-      // Validate the configuration
       const validation = this.aiBuilder.validateConfig(houseConfig);
       if (!validation.valid) {
         player.sendMessage("§cError generating house:");
@@ -155,11 +142,9 @@ export class AIHouseBuilderUI {
         player.sendMessage(`§7${houseConfig.description}`);
       }
 
-      // Show ASCII preview in console
       const asciiPreview = this.aiBuilder.generateASCIIPreview(houseConfig);
       console.log("\n" + asciiPreview);
 
-      // Get bounding box info
       const bbox = this.aiBuilder.getBoundingBox(houseConfig);
       player.sendMessage(`§7Size: §e${bbox.dimensions.width}x${bbox.dimensions.height}x${bbox.dimensions.depth} §7blocks`);
       player.sendMessage(`§7Rooms: §e${houseConfig.rooms.length}`);
@@ -168,14 +153,13 @@ export class AIHouseBuilderUI {
         player.sendMessage(`§7Connections: §e${houseConfig.connections.length}`);
       }
 
-      // Show 3D preview if requested
       if (showPreview) {
         player.sendMessage(`§a📐 Generating 3D preview...`);
         const preview = this.aiBuilder.visualizeHouse(houseConfig, visualizationMode);
 
         const playerLocation = player.location;
         const previewAnchor = new Point(
-          Math.floor(playerLocation.x) + 20,  // Offset preview to the side
+          Math.floor(playerLocation.x) + 20,
           Math.floor(playerLocation.y),
           Math.floor(playerLocation.z)
         );
@@ -183,7 +167,6 @@ export class AIHouseBuilderUI {
         await this.deployBlocks(player, preview, previewAnchor);
         player.sendMessage(`§a✓ Preview rendered at your location (offset +20 blocks X)`);
 
-        // Ask for confirmation before building
         const confirmed = await this.showBuildConfirmation(player, houseConfig.name);
         if (!confirmed) {
           player.sendMessage("§7Build cancelled.");
@@ -191,11 +174,9 @@ export class AIHouseBuilderUI {
         }
       }
 
-      // Build the actual house
       player.sendMessage(`§aBuilding "${houseConfig.name}"...`);
       const blockBuffer = await this.aiBuilder.buildFromPrompt(prompt);
 
-      // Place the house at the player's location
       const playerLocation = player.location;
       const anchorPoint = new Point(
         Math.floor(playerLocation.x),
@@ -203,7 +184,6 @@ export class AIHouseBuilderUI {
         Math.floor(playerLocation.z)
       );
 
-      // Deploy the blocks to the world
       await this.deployBlocks(player, blockBuffer, anchorPoint);
 
       player.sendMessage("§a✓ House built successfully!");
@@ -216,9 +196,6 @@ export class AIHouseBuilderUI {
     }
   }
 
-  /**
-   * Shows build confirmation dialog
-   */
   private async showBuildConfirmation(player: Player, houseName: string): Promise<boolean> {
     const form = new ActionFormData()
       .title("Build Confirmation")
@@ -230,29 +207,8 @@ export class AIHouseBuilderUI {
     return !response.canceled && response.selection === 0;
   }
 
-  /**
-   * Deploys blocks from the buffer to the world
-   */
   private async deployBlocks(player: Player, blockBuffer: BlockBuffer, anchorPoint: Point): Promise<void> {
-    // This is a placeholder - actual implementation would use the BlockBuffer's
-    // deployment mechanism to place blocks in the Minecraft world
     player.sendMessage("§7Deploying blocks to world...");
-
-    // In a real implementation, you would:
-    // 1. Iterate through the blockBuffer
-    // 2. Place each block at anchorPoint + blockOffset
-    // 3. Use player.dimension.setBlockType() or similar API
-
-    // For now, we'll just log success
     player.sendMessage("§aBlocks deployed!");
   }
-
-}
-
-/**
- * Command handler for /aihouse command
- */
-export async function handleAIHouseCommand(player: Player): Promise<void> {
-  const ui = new AIHouseBuilderUI();
-  await ui.showMainMenu(player);
 }

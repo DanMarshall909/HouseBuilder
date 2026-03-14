@@ -1,6 +1,3 @@
-/**
- * AI House Builder module
- * Exports AI-powered house generation functionality
- */
-
 export { AIHouseBuilder } from "./AIHouseBuilder";
+export type { IAIHouseBuilder } from "../core/ai/IAIHouseBuilder";
+export type { ILLMClient } from "../core/ai/ILLMClient";

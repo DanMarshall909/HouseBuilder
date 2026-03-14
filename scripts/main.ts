@@ -5,53 +5,45 @@ import { DynamicBlock } from "./textures/ColorBlockSelector";
 import { HouseBuilder } from "./HouseBuilder";
 import { Point, Orientation } from "./geometry/Point";
 import { BlockBuffer } from "./io/BlockBuffer";
-// Import AI builder and visualizer for programmatic use
+
+// --------------------------------------------------------------------------
+// Wiring: compose third-party implementations with core abstractions here.
+// This is the only file allowed to import from both ai-langchain/ and
+// implementations/.  All other modules depend only on interfaces.
+// --------------------------------------------------------------------------
+import { LangChainLLMClient } from "./ai-langchain/LangChainLLMClient";
 import { AIHouseBuilder } from "./ai/AIHouseBuilder";
 import { AIHouseBuilderUI } from "./ui/AIHouseBuilderUI";
 import { HouseVisualizer, VisualizationMode } from "./visualization/HouseVisualizer";
 
-// Initialize the block registry for use
+// Initialise registries
 MinecraftBlockRegistry.initialize();
+
+// Build the dependency graph
+const llmClient = new LangChainLLMClient();
+const aiHouseBuilder = new AIHouseBuilder(llmClient);
+const aiHouseBuilderUI = new AIHouseBuilderUI(aiHouseBuilder);
+
 const blockBuffer = new BlockBuffer();
 
 function mainTick() {
     const anchorPoint = new Point(40, -40, 0);
     const orientation = new Orientation(anchorPoint, 0);
 
-    // Assuming you need a block type from ColorBlockSelector and to pass it as a string ID
-    const index = system.currentTick % 100; // Example index that changes with the tick
-
-    // Draw a sphere with a center point, radius, tick count and block type
-    // drawSphere(blockBuffer, anchorPoint, 20, system.currentTick, DynamicBlock.funkyGlassSelectors.Wave);
     let houseBuilder = new HouseBuilder(blockBuffer, orientation);
-
     houseBuilder.build();
 
-    // Continue running mainTick every server tick
     system.run(mainTick);
 }
 
-// Start the main tick function
 system.run(mainTick);
 
-// Log startup message
-console.log("HouseBuilder initialized with AI House Builder and 3D Visualization support!");
-console.log("AI House Builder can be used programmatically via the AIHouseBuilder class");
-console.log("House Visualizer provides 3D previews in multiple modes");
+console.log("HouseBuilder initialised.");
+console.log("AI House Builder ready — backed by LangChainLLMClient.");
+console.log("Swap LangChainLLMClient for any ILLMClient implementation to change LLM provider.");
 
-// Example usage (commented out):
-// async function buildAIHouseWithPreview() {
-//   const aiBuilder = new AIHouseBuilder();
-//   const prompt = "A cozy cottage with a bedroom and living room";
-//
-//   // Generate with preview
-//   const result = await aiBuilder.buildWithPreview(prompt, VisualizationMode.Wireframe);
-//   console.log(result.ascii); // Print ASCII preview
-//
-//   // Deploy preview and actual house to world
-//   // result.preview - BlockBuffer for visualization
-//   // result.house - BlockBuffer for actual house
-// }
-
-// Export AI builder and visualizer for use in other scripts
+// Export stable interfaces and the wired-up concrete objects for use in
+// other scripts.  Consumers should type against IAIHouseBuilder and
+// ILLMClient rather than the concrete classes.
 export { AIHouseBuilder, AIHouseBuilderUI, HouseVisualizer, VisualizationMode };
+export { aiHouseBuilder, aiHouseBuilderUI };
