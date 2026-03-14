@@ -19,10 +19,25 @@ import { HouseVisualizer, VisualizationMode } from "./visualization/HouseVisuali
 // Initialise registries
 MinecraftBlockRegistry.initialize();
 
-// Build the dependency graph
-const llmClient = new LangChainLLMClient();
-const aiHouseBuilder = new AIHouseBuilder(llmClient);
-const aiHouseBuilderUI = new AIHouseBuilderUI(aiHouseBuilder);
+let aiHouseBuilder: AIHouseBuilder | undefined;
+let aiHouseBuilderUI: AIHouseBuilderUI | undefined;
+
+function getAIHouseBuilder(): AIHouseBuilder {
+  if (!aiHouseBuilder) {
+    const llmClient = new LangChainLLMClient();
+    aiHouseBuilder = new AIHouseBuilder(llmClient);
+  }
+
+  return aiHouseBuilder;
+}
+
+function getAIHouseBuilderUI(): AIHouseBuilderUI {
+  if (!aiHouseBuilderUI) {
+    aiHouseBuilderUI = new AIHouseBuilderUI(getAIHouseBuilder());
+  }
+
+  return aiHouseBuilderUI;
+}
 
 const blockBuffer = new BlockBuffer();
 
@@ -39,11 +54,11 @@ function mainTick() {
 system.run(mainTick);
 
 console.log("HouseBuilder initialised.");
-console.log("AI House Builder ready — backed by LangChainLLMClient.");
+console.log("AI House Builder is configured for lazy initialization.");
 console.log("Swap LangChainLLMClient for any ILLMClient implementation to change LLM provider.");
 
-// Export stable interfaces and the wired-up concrete objects for use in
-// other scripts.  Consumers should type against IAIHouseBuilder and
+// Export stable interfaces and lazy accessors for use in
+// other scripts. Consumers should type against IAIHouseBuilder and
 // ILLMClient rather than the concrete classes.
 export { AIHouseBuilder, AIHouseBuilderUI, HouseVisualizer, VisualizationMode };
-export { aiHouseBuilder, aiHouseBuilderUI };
+export { getAIHouseBuilder, getAIHouseBuilderUI };
