@@ -1,69 +1,123 @@
-import { ChatOpenAI } from "@langchain/openai";
-import { z } from "zod";
-import { HouseConfig, RoomConfig, ObjectConfig, RoomConnection } from "../config/HouseConfig";
+import { ILLMClient } from "../core/ai/ILLMClient";
+import { IAIHouseBuilder } from "../core/ai/IAIHouseBuilder";
+import { HouseConfig, RoomConfig, RoomConnection } from "../config/HouseConfig";
 import { JsonHouseBuilder } from "../config/JsonHouseBuilder";
 import { BlockBuffer } from "../io/BlockBuffer";
 import { HouseVisualizer, VisualizationMode, VisualizerOptions } from "../visualization/HouseVisualizer";
 
 /**
- * AI-powered house builder that generates houses from natural language prompts
- * Uses LangChain to parse user prompts and generate HouseConfig structures
+ * AI-powered house builder that generates houses from natural language prompts.
+ *
+ * This class contains only domain logic — prompt engineering, JSON parsing,
+ * validation, and room-connection inference.  It has no dependency on any
+ * specific LLM library; the actual model call is delegated to the ILLMClient
+ * injected at construction time.
+ *
+ * To use LangChain/OpenAI wire in a LangChainLLMClient from ai-langchain/.
+ * To use any other provider, implement ILLMClient and pass that instead.
  */
-export class AIHouseBuilder {
-  private llm: ChatOpenAI;
+export class AIHouseBuilder implements IAIHouseBuilder {
+  private readonly llm: ILLMClient;
 
-  constructor(apiKey?: string, modelName: string = "gpt-4") {
-    this.llm = new ChatOpenAI({
-      openAIApiKey: apiKey || process.env.OPENAI_API_KEY,
-      modelName: modelName,
-      temperature: 0.7,
-    });
+  constructor(llm: ILLMClient) {
+    this.llm = llm;
   }
 
-  /**
-   * Builds a house from a natural language prompt
-   * @param prompt - User's description of the house they want to build
-   * @returns BlockBuffer containing the generated house
-   */
   async buildFromPrompt(prompt: string): Promise<BlockBuffer> {
     const houseConfig = await this.generateHouseConfig(prompt);
     const builder = new JsonHouseBuilder();
     return builder.build(houseConfig);
   }
 
-  /**
-   * Generates a HouseConfig from a natural language prompt using LangChain
-   * @param prompt - User's description of the house
-   * @returns A complete HouseConfig object
-   */
   async generateHouseConfig(prompt: string): Promise<HouseConfig> {
     const systemPrompt = this.buildSystemPrompt();
-
-    const response = await this.llm.invoke([
-      { role: "system", content: systemPrompt },
-      { role: "user", content: prompt }
-    ]);
-
-    // Parse the LLM response as JSON
-    const responseText = typeof response.content === 'string'
-      ? response.content
-      : JSON.stringify(response.content);
+    const responseText = await this.llm.complete(systemPrompt, prompt);
 
     // Extract JSON from markdown code blocks if present
-    const jsonMatch = responseText.match(/```(?:json)?\s*(\{[\s\S]*\})\s*```/) || responseText.match(/(\{[\s\S]*\})/);
+    const jsonMatch =
+      responseText.match(/```(?:json)?\s*(\{[\s\S]*\})\s*```/) ||
+      responseText.match(/(\{[\s\S]*\})/);
     const jsonText = jsonMatch ? jsonMatch[1] : responseText;
 
     const houseConfig: HouseConfig = JSON.parse(jsonText);
-
-    // Post-process to add door connections between rooms
     houseConfig.connections = this.inferRoomConnections(houseConfig);
-
     return houseConfig;
   }
 
-  /**
-   * Builds the system prompt for the LLM
-   */
+  validateConfig(config: HouseConfig): { valid: boolean; errors: string[] } {
+    const errors: string[] = [];
+
+    if (!config.name) {
+      errors.push("House must have a name");
+    }
+
+    if (!config.rooms || config.rooms.length === 0) {
+      errors.push("House must have at least one room");
+    }
+
+    config.rooms.forEach((room, index) => {
+      if (room.width < 3 || room.depth < 3 || room.height < 3) {
+        errors.push(`Room ${index}: Dimensions must be at least 3 blocks`);
+      }
+
+      const validRotations = [0, 90, 180, 270];
+      if (!validRotations.includes(room.rotation)) {
+        errors.push(`Room ${index}: Invalid rotation ${room.rotation}`);
+      }
+    });
+
+    return { valid: errors.length === 0, errors };
+  }
+
+  visualizeHouse(
+    config: HouseConfig,
+    mode: VisualizationMode = VisualizationMode.Wireframe
+  ): BlockBuffer {
+    const visualizer = new HouseVisualizer();
+    const options: VisualizerOptions = {
+      mode,
+      showRoomLabels: true,
+      showDimensions: true,
+      highlightConnections: true,
+    };
+    return visualizer.visualize(config, options);
+  }
+
+  generateASCIIPreview(config: HouseConfig): string {
+    const visualizer = new HouseVisualizer();
+    return visualizer.generateASCIIVisualization(config);
+  }
+
+  getBoundingBox(config: HouseConfig): {
+    min: { x: number; y: number; z: number };
+    max: { x: number; y: number; z: number };
+    dimensions: { width: number; height: number; depth: number };
+  } {
+    const visualizer = new HouseVisualizer();
+    return visualizer.calculateBoundingBox(config);
+  }
+
+  async buildWithPreview(
+    prompt: string,
+    visualizationMode: VisualizationMode = VisualizationMode.Wireframe
+  ): Promise<{
+    config: HouseConfig;
+    house: BlockBuffer;
+    preview: BlockBuffer;
+    ascii: string;
+  }> {
+    const config = await this.generateHouseConfig(prompt);
+    const builder = new JsonHouseBuilder();
+    const house = builder.build(config);
+    const preview = this.visualizeHouse(config, visualizationMode);
+    const ascii = this.generateASCIIPreview(config);
+    return { config, house, preview, ascii };
+  }
+
+  // -------------------------------------------------------------------------
+  // Private helpers
+  // -------------------------------------------------------------------------
+
   private buildSystemPrompt(): string {
     return `You are an expert Minecraft house architect. Given a user's description, generate a valid HouseConfig JSON.
 
@@ -124,10 +178,6 @@ Key guidelines:
 Respond with ONLY the JSON, no explanations or markdown.`;
   }
 
-  /**
-   * Infers room connections based on door placements
-   * This helps connect rooms that have doors facing each other
-   */
   private inferRoomConnections(config: HouseConfig): RoomConnection[] {
     const connections: RoomConnection[] = [];
 
@@ -136,7 +186,6 @@ Respond with ONLY the JSON, no explanations or markdown.`;
         const room1 = config.rooms[i];
         const room2 = config.rooms[j];
 
-        // Check if rooms are adjacent and have doors that could connect
         if (this.areRoomsAdjacent(room1, room2)) {
           const door1 = room1.doors?.[0];
           const door2 = room2.doors?.[0];
@@ -146,7 +195,7 @@ Respond with ONLY the JSON, no explanations or markdown.`;
               fromRoomIndex: i,
               toRoomIndex: j,
               doorMaterial: door1.material,
-              description: `Connect ${room1.name || 'Room ' + i} to ${room2.name || 'Room ' + j}`
+              description: `Connect ${room1.name ?? "Room " + i} to ${room2.name ?? "Room " + j}`,
             });
           }
         }
@@ -156,114 +205,18 @@ Respond with ONLY the JSON, no explanations or markdown.`;
     return connections;
   }
 
-  /**
-   * Checks if two rooms are adjacent (sharing a wall)
-   */
   private areRoomsAdjacent(room1: RoomConfig, room2: RoomConfig): boolean {
     const pos1 = room1.position;
     const pos2 = room2.position;
 
-    // Check if rooms are next to each other on any axis
-    const xAdjacent = Math.abs(pos1.x - pos2.x) === room1.width || Math.abs(pos1.x - pos2.x) === room2.width;
-    const zAdjacent = Math.abs(pos1.z - pos2.z) === room1.depth || Math.abs(pos1.z - pos2.z) === room2.depth;
-    const sameY = Math.abs(pos1.y - pos2.y) < 2; // Allow small Y difference
+    const xAdjacent =
+      Math.abs(pos1.x - pos2.x) === room1.width ||
+      Math.abs(pos1.x - pos2.x) === room2.width;
+    const zAdjacent =
+      Math.abs(pos1.z - pos2.z) === room1.depth ||
+      Math.abs(pos1.z - pos2.z) === room2.depth;
+    const sameY = Math.abs(pos1.y - pos2.y) < 2;
 
     return sameY && (xAdjacent || zAdjacent);
-  }
-
-  /**
-   * Validates a generated house configuration
-   */
-  validateConfig(config: HouseConfig): { valid: boolean; errors: string[] } {
-    const errors: string[] = [];
-
-    if (!config.name) {
-      errors.push("House must have a name");
-    }
-
-    if (!config.rooms || config.rooms.length === 0) {
-      errors.push("House must have at least one room");
-    }
-
-    config.rooms.forEach((room, index) => {
-      if (room.width < 3 || room.depth < 3 || room.height < 3) {
-        errors.push(`Room ${index}: Dimensions must be at least 3 blocks`);
-      }
-
-      const validRotations = [0, 90, 180, 270];
-      if (!validRotations.includes(room.rotation)) {
-        errors.push(`Room ${index}: Invalid rotation ${room.rotation}`);
-      }
-    });
-
-    return {
-      valid: errors.length === 0,
-      errors
-    };
-  }
-
-  /**
-   * Generates a 3D visualization preview of a house config
-   * @param config - House configuration to visualize
-   * @param mode - Visualization mode (wireframe, holographic, etc.)
-   * @returns BlockBuffer containing the visualization
-   */
-  visualizeHouse(config: HouseConfig, mode: VisualizationMode = VisualizationMode.Wireframe): BlockBuffer {
-    const visualizer = new HouseVisualizer();
-    const options: VisualizerOptions = {
-      mode,
-      showRoomLabels: true,
-      showDimensions: true,
-      highlightConnections: true
-    };
-    return visualizer.visualize(config, options);
-  }
-
-  /**
-   * Generates an ASCII visualization for console output
-   * @param config - House configuration
-   * @returns ASCII art representation
-   */
-  generateASCIIPreview(config: HouseConfig): string {
-    const visualizer = new HouseVisualizer();
-    return visualizer.generateASCIIVisualization(config);
-  }
-
-  /**
-   * Gets bounding box information for a house
-   * @param config - House configuration
-   * @returns Bounding box with min, max, and dimensions
-   */
-  getBoundingBox(config: HouseConfig): {
-    min: { x: number; y: number; z: number };
-    max: { x: number; y: number; z: number };
-    dimensions: { width: number; height: number; depth: number };
-  } {
-    const visualizer = new HouseVisualizer();
-    return visualizer.calculateBoundingBox(config);
-  }
-
-  /**
-   * Generates house with preview
-   * @param prompt - User's description
-   * @param visualizationMode - How to visualize the preview
-   * @returns Object with both config and visualization buffer
-   */
-  async buildWithPreview(
-    prompt: string,
-    visualizationMode: VisualizationMode = VisualizationMode.Wireframe
-  ): Promise<{
-    config: HouseConfig;
-    house: BlockBuffer;
-    preview: BlockBuffer;
-    ascii: string;
-  }> {
-    const config = await this.generateHouseConfig(prompt);
-    const builder = new JsonHouseBuilder();
-    const house = builder.build(config);
-    const preview = this.visualizeHouse(config, visualizationMode);
-    const ascii = this.generateASCIIPreview(config);
-
-    return { config, house, preview, ascii };
   }
 }

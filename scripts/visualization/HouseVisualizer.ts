@@ -2,7 +2,6 @@ import { HouseConfig, RoomConfig, Position } from "../config/HouseConfig";
 import { BlockType } from "../types/Blocks";
 import { Point, Orientation, Rotation } from "../geometry/Point";
 import { BlockBuffer } from "../io/BlockBuffer";
-import { Dimension } from "@minecraft/server";
 
 /**
  * Visualization mode for house preview
@@ -34,11 +33,7 @@ export interface VisualizerOptions {
  * Renders houses in various visual modes for preview and planning
  */
 export class HouseVisualizer {
-  private dimension?: Dimension;
-
-  constructor(dimension?: Dimension) {
-    this.dimension = dimension;
-  }
+  constructor() {}
 
   /**
    * Visualizes a house configuration in 3D
