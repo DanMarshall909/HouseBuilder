@@ -38,29 +38,6 @@ const lookTarget = new THREE.Vector3(0, 0, 0);
 let yaw = 0;
 let pitch = 0;
 
-function syncLookTarget(distance = 10) {
-  const direction = new THREE.Vector3(
-    Math.sin(yaw) * Math.cos(pitch),
-    Math.sin(pitch),
-    Math.cos(yaw) * Math.cos(pitch)
-  ).normalize();
-
-  lookTarget.copy(camera.position).addScaledVector(direction, distance);
-}
-
-function applyLookDirection() {
-  camera.lookAt(lookTarget);
-}
-
-function setCameraFacing(position, target) {
-  camera.position.copy(position);
-  const direction = target.clone().sub(position).normalize();
-  pitch = Math.asin(direction.y);
-  yaw = Math.atan2(direction.x, direction.z);
-  syncLookTarget(position.distanceTo(target));
-  applyLookDirection();
-}
-
 const hemi = new THREE.HemisphereLight(0xffffff, 0x7d6b4a, 1.05);
 scene.add(hemi);
 
@@ -80,11 +57,50 @@ const MATERIALS = {
   wall: new THREE.MeshStandardMaterial({ color: 0xbcb7ae, roughness: 0.88, metalness: 0.02 }),
   glass: new THREE.MeshStandardMaterial({ color: 0x9ad8ff, transparent: true, opacity: 0.5, roughness: 0.2 }),
   door: new THREE.MeshStandardMaterial({ color: 0x7b4e2c, roughness: 0.82, metalness: 0.05 }),
+  roof: new THREE.MeshStandardMaterial({ color: 0x8e4f34, roughness: 0.9, metalness: 0.03 }),
   roomTint: new THREE.MeshStandardMaterial({ color: 0x58b6ff, transparent: true, opacity: 0.08 }),
 };
 
-const SURFACE_MATERIAL_KEYS = ["floor", "ceiling", "wall", "glass", "door", "roomTint"];
+const SURFACE_MATERIAL_KEYS = ["floor", "ceiling", "wall", "glass", "door", "roof", "roomTint"];
+const CUBE_GEOMETRY = new THREE.BoxGeometry(1, 1, 1);
+const MATERIAL_BY_KIND = {
+  floor: MATERIALS.floor,
+  ceiling: MATERIALS.ceiling,
+  wall: MATERIALS.wall,
+  window: MATERIALS.glass,
+  door: MATERIALS.door,
+  roof: MATERIALS.roof,
+};
+
 let halfOpacityEnabled = false;
+let lastLoadedSignature = "";
+let isLoadingPreview = false;
+
+function setStatus(text) {
+  statusEl.textContent = text;
+}
+
+function syncLookTarget(distance = 10) {
+  const direction = new THREE.Vector3(
+    Math.sin(yaw) * Math.cos(pitch),
+    Math.sin(pitch),
+    Math.cos(yaw) * Math.cos(pitch)
+  ).normalize();
+  lookTarget.copy(camera.position).addScaledVector(direction, distance);
+}
+
+function applyLookDirection() {
+  camera.lookAt(lookTarget);
+}
+
+function setCameraFacing(position, target) {
+  camera.position.copy(position);
+  const direction = target.clone().sub(position).normalize();
+  pitch = Math.asin(direction.y);
+  yaw = Math.atan2(direction.x, direction.z);
+  syncLookTarget(position.distanceTo(target));
+  applyLookDirection();
+}
 
 function applySurfaceOpacityMode() {
   SURFACE_MATERIAL_KEYS.forEach((key) => {
@@ -94,27 +110,21 @@ function applySurfaceOpacityMode() {
     if (halfOpacityEnabled) {
       material.transparent = true;
       material.opacity = 0.5;
+    } else if (key === "glass") {
+      material.transparent = true;
+      material.opacity = 0.5;
+    } else if (key === "roomTint") {
+      material.transparent = true;
+      material.opacity = 0.08;
     } else {
-      if (key === "glass") {
-        material.transparent = true;
-        material.opacity = 0.5;
-      } else if (key === "roomTint") {
-        material.transparent = true;
-        material.opacity = 0.08;
-      } else {
-        material.transparent = false;
-        material.opacity = 1;
-      }
+      material.transparent = false;
+      material.opacity = 1;
     }
 
     material.needsUpdate = true;
   });
 
   opacityToggleButton.textContent = halfOpacityEnabled ? "Toggle 50% Opacity (On)" : "Toggle 50% Opacity";
-}
-
-function setStatus(text) {
-  statusEl.textContent = text;
 }
 
 function clearPreview() {
@@ -129,14 +139,8 @@ function clearPreview() {
   }
 }
 
-function roomColor(index) {
-  const hue = (index * 57) % 360;
-  return new THREE.Color(`hsl(${hue} 58% 57%)`);
-}
-
 function normalizeRotation(rotation = 0) {
-  const normalized = ((rotation % 360) + 360) % 360;
-  return normalized;
+  return ((rotation % 360) + 360) % 360;
 }
 
 function transformLocal(room, lx, ly, lz) {
@@ -158,141 +162,124 @@ function transformLocal(room, lx, ly, lz) {
   }
 }
 
-function roomToWorldBox(room, centerLocal, sizeLocal) {
-  const center = transformLocal(room, centerLocal.x, centerLocal.y, centerLocal.z);
-  const mesh = new THREE.Mesh(new THREE.BoxGeometry(sizeLocal.x, sizeLocal.y, sizeLocal.z), MATERIALS.wall);
-  mesh.position.set(center.x, center.y, center.z);
-  mesh.rotation.y = THREE.MathUtils.degToRad(normalizeRotation(room.rotation));
-  return mesh;
+function blockKey(x, y, z) {
+  return `${x}:${y}:${z}`;
 }
 
-function addFloor(room) {
-  if (!room.floor) return;
-  const yOffset = room.floor.yOffset ?? 0;
-  const mesh = roomToWorldBox(
-    room,
-    { x: (room.width - 1) / 2, y: yOffset, z: (room.depth - 1) / 2 },
-    { x: room.width, y: 0.2, z: room.depth }
-  );
-  mesh.material = MATERIALS.floor;
-  previewRoot.add(mesh);
+function setBlock(buffer, room, lx, ly, lz, kind) {
+  const world = transformLocal(room, lx, ly, lz);
+  buffer.set(blockKey(world.x, world.y, world.z), { x: world.x, y: world.y, z: world.z, kind });
 }
 
-function addCeiling(room) {
-  if (!room.ceiling) return;
-  const mesh = roomToWorldBox(
-    room,
-    { x: (room.width - 1) / 2, y: room.height, z: (room.depth - 1) / 2 },
-    { x: room.width, y: 0.2, z: room.depth }
-  );
-  mesh.material = MATERIALS.ceiling;
-  previewRoot.add(mesh);
-}
-
-function wallPlacement(room, side) {
-  if (side === "front") {
-    return { center: { x: (room.width - 1) / 2, y: room.height / 2, z: 0 }, size: { x: room.width, y: room.height, z: 0.2 } };
+function fillLineX(buffer, room, xStart, xEnd, y, z, kind) {
+  for (let x = xStart; x <= xEnd; x++) {
+    setBlock(buffer, room, x, y, z, kind);
   }
-  if (side === "back") {
-    return {
-      center: { x: (room.width - 1) / 2, y: room.height / 2, z: room.depth - 1 },
-      size: { x: room.width, y: room.height, z: 0.2 },
-    };
-  }
-  if (side === "left") {
-    return { center: { x: 0, y: room.height / 2, z: (room.depth - 1) / 2 }, size: { x: 0.2, y: room.height, z: room.depth } };
-  }
-  return {
-    center: { x: room.width - 1, y: room.height / 2, z: (room.depth - 1) / 2 },
-    size: { x: 0.2, y: room.height, z: room.depth },
-  };
 }
 
-function addWalls(room) {
+function fillLineZ(buffer, room, zStart, zEnd, y, x, kind) {
+  for (let z = zStart; z <= zEnd; z++) {
+    setBlock(buffer, room, x, y, z, kind);
+  }
+}
+
+function buildRoomIntoBuffer(room, buffer) {
+  const width = room.width;
+  const depth = room.depth;
+  const height = room.height;
+
+  if (room.floor) {
+    const y = room.floor.yOffset ?? 0;
+    for (let x = 0; x < width; x++) {
+      for (let z = 0; z < depth; z++) {
+        setBlock(buffer, room, x, y, z, "floor");
+      }
+    }
+  }
+
+  if (room.ceiling) {
+    for (let x = 0; x < width; x++) {
+      for (let z = 0; z < depth; z++) {
+        setBlock(buffer, room, x, height, z, "ceiling");
+      }
+    }
+  }
+
   (room.walls ?? []).forEach((wall) => {
     const startHeight = wall.startHeight ?? 1;
-    const wallHeight = wall.wallHeight ?? room.height;
-    const config = wallPlacement(room, wall.side);
-    const mesh = roomToWorldBox(
-      room,
-      { x: config.center.x, y: startHeight + wallHeight / 2 - 0.5, z: config.center.z },
-      { x: config.size.x, y: wallHeight, z: config.size.z }
-    );
-    mesh.material = MATERIALS.wall;
-    previewRoot.add(mesh);
+    const wallHeight = wall.wallHeight ?? height;
+
+    for (let y = startHeight; y < startHeight + wallHeight; y++) {
+      if (wall.side === "front") {
+        fillLineX(buffer, room, 0, width - 1, y, 0, "wall");
+      } else if (wall.side === "back") {
+        fillLineX(buffer, room, 0, width - 1, y, depth - 1, "wall");
+      } else if (wall.side === "left") {
+        fillLineZ(buffer, room, 0, depth - 1, y, 0, "wall");
+      } else {
+        fillLineZ(buffer, room, 0, depth - 1, y, width - 1, "wall");
+      }
+    }
   });
-}
 
-function openingPlacement(room, side, offsetAlong, offsetHeight, width, height) {
-  if (side === "front") {
-    return { center: { x: offsetAlong + (width - 1) / 2, y: offsetHeight + (height - 1) / 2, z: 0 }, size: { x: width, y: height, z: 0.22 } };
-  }
-  if (side === "back") {
-    return {
-      center: { x: offsetAlong + (width - 1) / 2, y: offsetHeight + (height - 1) / 2, z: room.depth - 1 },
-      size: { x: width, y: height, z: 0.22 },
-    };
-  }
-  if (side === "left") {
-    return {
-      center: { x: 0, y: offsetHeight + (height - 1) / 2, z: offsetAlong + (width - 1) / 2 },
-      size: { x: 0.22, y: height, z: width },
-    };
-  }
-  return {
-    center: { x: room.width - 1, y: offsetHeight + (height - 1) / 2, z: offsetAlong + (width - 1) / 2 },
-    size: { x: 0.22, y: height, z: width },
-  };
-}
-
-function addWindows(room) {
   (room.windows ?? []).forEach((window) => {
-    const width = window.width ?? 2;
-    const height = window.height ?? 2;
-    const config = openingPlacement(room, window.side, window.offsetAlong, window.offsetHeight, width, height);
-    const mesh = roomToWorldBox(room, config.center, config.size);
-    mesh.material = MATERIALS.glass;
-    previewRoot.add(mesh);
-  });
-}
+    const w = window.width ?? 2;
+    const h = window.height ?? 2;
 
-function addDoors(room) {
+    for (let dy = 0; dy < h; dy++) {
+      for (let da = 0; da < w; da++) {
+        if (window.side === "front") {
+          setBlock(buffer, room, window.offsetAlong + da, window.offsetHeight + dy, 0, "window");
+        } else if (window.side === "back") {
+          setBlock(buffer, room, window.offsetAlong + da, window.offsetHeight + dy, depth - 1, "window");
+        } else if (window.side === "left") {
+          setBlock(buffer, room, 0, window.offsetHeight + dy, window.offsetAlong + da, "window");
+        } else {
+          setBlock(buffer, room, width - 1, window.offsetHeight + dy, window.offsetAlong + da, "window");
+        }
+      }
+    }
+  });
+
   (room.doors ?? []).forEach((door) => {
-    const config = openingPlacement(room, door.side, door.offsetAlong, 1, 1, 2);
-    const mesh = roomToWorldBox(room, config.center, config.size);
-    mesh.material = MATERIALS.door;
-    previewRoot.add(mesh);
+    for (let dy = 0; dy < 2; dy++) {
+      if (door.side === "front") {
+        setBlock(buffer, room, door.offsetAlong, 1 + dy, 0, "door");
+      } else if (door.side === "back") {
+        setBlock(buffer, room, door.offsetAlong, 1 + dy, depth - 1, "door");
+      } else if (door.side === "left") {
+        setBlock(buffer, room, 0, 1 + dy, door.offsetAlong, "door");
+      } else {
+        setBlock(buffer, room, width - 1, 1 + dy, door.offsetAlong, "door");
+      }
+    }
   });
+
+  if (room.roof) {
+    const roofY = height + 1;
+    for (let x = 0; x < width; x++) {
+      for (let z = 0; z < depth; z++) {
+        setBlock(buffer, room, x, roofY, z, "roof");
+      }
+    }
+  }
 }
 
-function addRoomBounds(room, index) {
-  const color = roomColor(index);
-  const boxGeometry = new THREE.BoxGeometry(room.width, room.height, room.depth);
-  const fillMat = MATERIALS.roomTint.clone();
-  fillMat.color = color;
-  const fill = new THREE.Mesh(boxGeometry, fillMat);
+function renderVoxelBuffer(buffer) {
+  const tintGeo = new THREE.BoxGeometry(1.02, 1.02, 1.02);
 
-  const lineGeo = new THREE.EdgesGeometry(boxGeometry);
-  const lineMat = new THREE.LineBasicMaterial({ color: color.clone().multiplyScalar(0.75) });
-  const wire = new THREE.LineSegments(lineGeo, lineMat);
+  buffer.forEach((block) => {
+    const material = MATERIAL_BY_KIND[block.kind] ?? MATERIALS.wall;
+    const cube = new THREE.Mesh(CUBE_GEOMETRY, material);
+    cube.position.set(block.x, block.y, block.z);
+    previewRoot.add(cube);
 
-  const center = transformLocal(room, (room.width - 1) / 2, room.height / 2, (room.depth - 1) / 2);
-  fill.position.set(center.x, center.y, center.z);
-  wire.position.copy(fill.position);
-  fill.rotation.y = THREE.MathUtils.degToRad(normalizeRotation(room.rotation));
-  wire.rotation.y = fill.rotation.y;
-
-  previewRoot.add(fill);
-  previewRoot.add(wire);
-}
-
-function addRoom(room, index) {
-  addFloor(room);
-  addCeiling(room);
-  addWalls(room);
-  addWindows(room);
-  addDoors(room);
-  addRoomBounds(room, index);
+    if (block.kind === "window" || block.kind === "door") {
+      const outline = new THREE.Mesh(tintGeo, MATERIALS.roomTint);
+      outline.position.copy(cube.position);
+      previewRoot.add(outline);
+    }
+  });
 }
 
 function framePreview() {
@@ -311,29 +298,45 @@ function framePreview() {
 }
 
 async function loadPreview(path) {
+  if (isLoadingPreview) {
+    return;
+  }
+
   try {
+    isLoadingPreview = true;
     setStatus(`Loading ${path}...`);
-    const response = await fetch(path);
+    const response = await fetch(`${path}?t=${Date.now()}`, { cache: "no-store" });
     if (!response.ok) {
       throw new Error(`Failed to load JSON (${response.status})`);
     }
 
-    const config = await response.json();
+    const raw = await response.text();
+    const config = JSON.parse(raw);
     if (!Array.isArray(config.rooms)) {
       throw new Error("Invalid config: expected rooms array");
     }
 
+    const buffer = new Map();
+    config.rooms.forEach((room) => buildRoomIntoBuffer(room, buffer));
+
     clearPreview();
-    config.rooms.forEach((room, index) => addRoom(room, index));
+    renderVoxelBuffer(buffer);
     framePreview();
-    setStatus(`Loaded ${config.name ?? "house"} (${config.rooms.length} room(s)).`);
+    lastLoadedSignature = raw;
+    setStatus(`Loaded ${config.name ?? "house"} (${buffer.size} voxels).`);
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error";
     setStatus(`Error: ${message}`);
+  } finally {
+    isLoadingPreview = false;
   }
 }
 
 loadButton.addEventListener("click", () => {
+  loadPreview(exampleSelect.value);
+});
+
+exampleSelect.addEventListener("change", () => {
   loadPreview(exampleSelect.value);
 });
 
@@ -408,6 +411,28 @@ window.addEventListener("keyup", (event) => {
     event.preventDefault();
   }
 });
+
+setInterval(async () => {
+  if (isLoadingPreview) {
+    return;
+  }
+
+  const path = exampleSelect.value;
+  try {
+    const response = await fetch(`${path}?watch=${Date.now()}`, { cache: "no-store" });
+    if (!response.ok) {
+      return;
+    }
+
+    const raw = await response.text();
+    if (raw !== lastLoadedSignature) {
+      await loadPreview(path);
+      setStatus("Detected JSON change. Preview refreshed.");
+    }
+  } catch {
+    // Ignore transient watch errors
+  }
+}, 1000);
 
 tick();
 applySurfaceOpacityMode();
