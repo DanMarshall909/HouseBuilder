@@ -1,11 +1,11 @@
 import * as THREE from "three";
-import { OrbitControls } from "/node_modules/three/examples/jsm/controls/OrbitControls.js";
 
 const viewer = document.getElementById("viewer");
 const statusEl = document.getElementById("status");
 const exampleSelect = document.getElementById("exampleSelect");
 const loadButton = document.getElementById("loadButton");
 const resetCameraButton = document.getElementById("resetCameraButton");
+const opacityToggleButton = document.getElementById("opacityToggleButton");
 
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0xf9f3e3);
@@ -17,9 +17,49 @@ const renderer = new THREE.WebGLRenderer({ antialias: true });
 renderer.setSize(viewer.clientWidth, viewer.clientHeight);
 viewer.appendChild(renderer.domElement);
 
-const controls = new OrbitControls(camera, renderer.domElement);
-controls.enableDamping = true;
-controls.target.set(0, 0, 0);
+const keyState = {
+  KeyW: false,
+  KeyA: false,
+  KeyS: false,
+  KeyD: false,
+  KeyQ: false,
+  KeyE: false,
+};
+
+const BASE_MOVE_SPEED = 0.22;
+const MAX_MOVE_SPEED = 1.8;
+const ACCELERATION_PER_SECOND = 1.35;
+let currentMoveSpeed = BASE_MOVE_SPEED;
+const clock = new THREE.Clock();
+
+const POINTER_SENSITIVITY = 0.0022;
+const pitchLimit = THREE.MathUtils.degToRad(89);
+const lookTarget = new THREE.Vector3(0, 0, 0);
+let yaw = 0;
+let pitch = 0;
+
+function syncLookTarget(distance = 10) {
+  const direction = new THREE.Vector3(
+    Math.sin(yaw) * Math.cos(pitch),
+    Math.sin(pitch),
+    Math.cos(yaw) * Math.cos(pitch)
+  ).normalize();
+
+  lookTarget.copy(camera.position).addScaledVector(direction, distance);
+}
+
+function applyLookDirection() {
+  camera.lookAt(lookTarget);
+}
+
+function setCameraFacing(position, target) {
+  camera.position.copy(position);
+  const direction = target.clone().sub(position).normalize();
+  pitch = Math.asin(direction.y);
+  yaw = Math.atan2(direction.x, direction.z);
+  syncLookTarget(position.distanceTo(target));
+  applyLookDirection();
+}
 
 const hemi = new THREE.HemisphereLight(0xffffff, 0x7d6b4a, 1.05);
 scene.add(hemi);
@@ -42,6 +82,36 @@ const MATERIALS = {
   door: new THREE.MeshStandardMaterial({ color: 0x7b4e2c, roughness: 0.82, metalness: 0.05 }),
   roomTint: new THREE.MeshStandardMaterial({ color: 0x58b6ff, transparent: true, opacity: 0.08 }),
 };
+
+const SURFACE_MATERIAL_KEYS = ["floor", "ceiling", "wall", "glass", "door", "roomTint"];
+let halfOpacityEnabled = false;
+
+function applySurfaceOpacityMode() {
+  SURFACE_MATERIAL_KEYS.forEach((key) => {
+    const material = MATERIALS[key];
+    if (!material) return;
+
+    if (halfOpacityEnabled) {
+      material.transparent = true;
+      material.opacity = 0.5;
+    } else {
+      if (key === "glass") {
+        material.transparent = true;
+        material.opacity = 0.5;
+      } else if (key === "roomTint") {
+        material.transparent = true;
+        material.opacity = 0.08;
+      } else {
+        material.transparent = false;
+        material.opacity = 1;
+      }
+    }
+
+    material.needsUpdate = true;
+  });
+
+  opacityToggleButton.textContent = halfOpacityEnabled ? "Toggle 50% Opacity (On)" : "Toggle 50% Opacity";
+}
 
 function setStatus(text) {
   statusEl.textContent = text;
@@ -228,15 +298,16 @@ function addRoom(room, index) {
 function framePreview() {
   const box = new THREE.Box3().setFromObject(previewRoot);
   if (box.isEmpty()) {
-    controls.target.set(0, 0, 0);
-    camera.position.set(30, 30, 30);
+    setCameraFacing(new THREE.Vector3(30, 30, 30), new THREE.Vector3(0, 0, 0));
     return;
   }
 
   const center = box.getCenter(new THREE.Vector3());
   const size = box.getSize(new THREE.Vector3()).length();
-  controls.target.copy(center);
-  camera.position.set(center.x + size * 0.8, center.y + size * 0.7, center.z + size * 0.8);
+  setCameraFacing(
+    new THREE.Vector3(center.x + size * 0.8, center.y + size * 0.7, center.z + size * 0.8),
+    center
+  );
 }
 
 async function loadPreview(path) {
@@ -270,6 +341,11 @@ resetCameraButton.addEventListener("click", () => {
   framePreview();
 });
 
+opacityToggleButton.addEventListener("click", () => {
+  halfOpacityEnabled = !halfOpacityEnabled;
+  applySurfaceOpacityMode();
+});
+
 window.addEventListener("resize", () => {
   camera.aspect = viewer.clientWidth / viewer.clientHeight;
   camera.updateProjectionMatrix();
@@ -277,10 +353,62 @@ window.addEventListener("resize", () => {
 });
 
 function tick() {
-  controls.update();
+  const deltaSeconds = Math.min(clock.getDelta(), 0.05);
+
+  const forward = new THREE.Vector3(Math.sin(yaw), 0, Math.cos(yaw)).normalize();
+  const right = new THREE.Vector3().crossVectors(camera.up, forward).normalize();
+  const movement = new THREE.Vector3();
+
+  if (keyState.KeyW) movement.add(forward);
+  if (keyState.KeyS) movement.sub(forward);
+  if (keyState.KeyD) movement.sub(right);
+  if (keyState.KeyA) movement.add(right);
+  if (keyState.KeyE) movement.y += 1;
+  if (keyState.KeyQ) movement.y -= 1;
+
+  if (movement.lengthSq() > 0) {
+    currentMoveSpeed = Math.min(MAX_MOVE_SPEED, currentMoveSpeed + ACCELERATION_PER_SECOND * deltaSeconds);
+    movement.normalize().multiplyScalar(currentMoveSpeed * (deltaSeconds * 60));
+    camera.position.add(movement);
+    lookTarget.add(movement);
+  } else {
+    currentMoveSpeed = BASE_MOVE_SPEED;
+  }
+
+  applyLookDirection();
   renderer.render(scene, camera);
   requestAnimationFrame(tick);
 }
 
+renderer.domElement.addEventListener("click", () => {
+  renderer.domElement.requestPointerLock();
+});
+
+window.addEventListener("mousemove", (event) => {
+  if (document.pointerLockElement !== renderer.domElement) {
+    return;
+  }
+
+  yaw += event.movementX * POINTER_SENSITIVITY;
+  pitch -= event.movementY * POINTER_SENSITIVITY;
+  pitch = THREE.MathUtils.clamp(pitch, -pitchLimit, pitchLimit);
+  syncLookTarget();
+});
+
+window.addEventListener("keydown", (event) => {
+  if (event.code in keyState) {
+    keyState[event.code] = true;
+    event.preventDefault();
+  }
+});
+
+window.addEventListener("keyup", (event) => {
+  if (event.code in keyState) {
+    keyState[event.code] = false;
+    event.preventDefault();
+  }
+});
+
 tick();
+applySurfaceOpacityMode();
 loadPreview(exampleSelect.value);
